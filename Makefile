@@ -14,13 +14,19 @@ LIBS_PARAMS = $(foreach l, $(LIBS), -l$l)
 SRC_FILES = src/*.cpp src/vendor/glad/src/glad.c
 CFLAGS = -Wall -Werror -pedantic -std=c++23
 
-all: build chess-gui
+ifeq ($(OS), Windows_NT)
+OS_TARGET = chess-gui-windows
+else 
+OS_TARGET = chess-gui-macos
+endif
+
+all: build $(OS_TARGET)
 
 build:
 	mkdir $(BUILD_DIR)
 
-chess-gui:
-	g++ $(CFLAGS) $(INCLUDE_PARAMS) $(LIB_DIRS_PARAMS) -o $(BUILD_DIR)/$(EXEC_FILE) $(SRC_FILES) $(LIBS_PARAMS) 
+chess-gui-windows:
+	g++ $(CFLAGS) $(INCLUDE_PARAMS) $(LIB_DIRS_PARAMS) -o $(BUILD_DIR)/$(EXEC_FILE) $(SRC_FILES)  $(LIBS_PARAMS) 
 
 run:
 	./$(BUILD_DIR)/$(EXEC_FILE)
