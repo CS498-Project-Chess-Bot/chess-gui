@@ -7,11 +7,12 @@ INCLUDE_PARAMS = $(foreach d, $(INCLUDE_DIRS), -I$d)
 LIB_DIRS = src/vendor/glfw/lib-mingw-w64
 LIB_DIRS_PARAMS = $(foreach l, $(LIB_DIRS), -L$l)
 
-LIBS = gdi32 opengl32 glfw3
+### library order matter! glfw3 needs to be before the others
+LIBS = glfw3 gdi32 opengl32 
 LIBS_PARAMS = $(foreach l, $(LIBS), -l$l)
 
 SRC_FILES = src/*.cpp src/vendor/glad/src/glad.c
-CFLAGS = -Wall 
+CFLAGS = -Wall -Werror -pedantic -std=c++23
 
 all: build chess-gui
 
@@ -19,7 +20,7 @@ build:
 	mkdir $(BUILD_DIR)
 
 chess-gui:
-	g++ $(CFLAGS) -o $(BUILD_DIR)/$(EXEC_FILE) $(SRC_FILES) $(INCLUDE_PARAMS) $(LIB_DIRS_PARAMS) $(LIBS_PARAMS) 
+	g++ $(CFLAGS) $(INCLUDE_PARAMS) $(LIB_DIRS_PARAMS) -o $(BUILD_DIR)/$(EXEC_FILE) $(SRC_FILES)  $(LIBS_PARAMS) 
 
 run:
 	./$(BUILD_DIR)/$(EXEC_FILE)
