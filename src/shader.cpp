@@ -1,24 +1,26 @@
 #include "shader.hpp"
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
-    const char* vertexCode = readShaderFileAsStr(vertexPath).c_str();
-    const char* fragmentCode = readShaderFileAsStr(fragmentPath).c_str();
+    std::string vertexCode = readShaderFileAsStr(vertexPath);
+    const char* vertexCodeCstr = vertexCode.c_str();
+    std::string fragmentCode = readShaderFileAsStr(fragmentPath);
+    const char* fragmentCodeCstr = fragmentCode.c_str();
 
     int success;
     char infoLog[512];
 
     uint32_t vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vertexCode, NULL);
+    glShaderSource(vertex, 1, &vertexCodeCstr, NULL);
     glCompileShader(vertex);
 
     glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
     if(!success) {
         glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
     uint32_t fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fragmentCode, NULL);
+    glShaderSource(fragment, 1, &fragmentCodeCstr, NULL);
     glCompileShader(fragment);
 
     glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);

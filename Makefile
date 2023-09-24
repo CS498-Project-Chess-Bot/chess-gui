@@ -14,7 +14,7 @@ LIBS_PARAMS = $(foreach l, $(LIBS), -l$l)
 OBJ_DIR = build/
 SRC_FILES = $(wildcard src/*.cpp) src/vendor/glad/src/glad.c
 HEADER_FILES = $(wildcard src/*.hpp)
-CFLAGS = -Wall -Werror -pedantic -std=c++23
+CFLAGS = -g -Wall -Werror -pedantic -std=c++23
 
 ifeq ($(OS), Windows_NT)
 EXEC_FILE = chess-gui-windows
@@ -26,13 +26,8 @@ all: $(EXEC_FILE)
 
 build:
 	mkdir -p $(BUILD_DIR)
-	mkdir -p $(BUILD_DIR)/shaders
-	cp ./shaders/* $(BUILD_DIR)/shaders
 
-shaders: ./shaders/*
-	cp ./shaders/* $(BUILD_DIR)/shaders
-
-$(EXEC_FILE): $(SRC_FILES) $(HEADER_FILES) build shaders
+$(EXEC_FILE): $(SRC_FILES) $(HEADER_FILES) build
 	g++ $(CFLAGS) $(INCLUDE_PARAMS) $(LIB_DIRS_PARAMS) -o $(BUILD_DIR)/$(EXEC_FILE) $(SRC_FILES)  $(LIBS_PARAMS) 
 
 run:
