@@ -11,21 +11,29 @@ LIB_DIRS_PARAMS = $(foreach l, $(LIB_DIRS), -L$l)
 LIBS = glfw3 gdi32 opengl32 
 LIBS_PARAMS = $(foreach l, $(LIBS), -l$l)
 
-SRC_FILES = src/*.cpp src/vendor/glad/src/glad.c
+OBJ_DIR = build/
+SRC_FILES = $(wildcard src/*.cpp) src/vendor/glad/src/glad.c
 CFLAGS = -Wall -Werror -pedantic -std=c++23
 
 ifeq ($(OS), Windows_NT)
-OS_TARGET = chess-gui-windows
+EXEC_FILE = chess-gui-windows
 else 
-OS_TARGET = chess-gui-macos
+EXEC_FILE = chess-gui-macos
 endif
 
-all: build $(OS_TARGET)
+all: $(EXEC_FILE)
 
-build:
-	mkdir $(BUILD_DIR)
+build: dirs shaders
 
-chess-gui-windows:
+dirs:
+	mkdir -p $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR)/shaders
+	cp ./shaders/* $(BUILD_DIR)/shaders
+
+shaders:
+	cp ./shaders/* $(BUILD_DIR)/shaders
+
+$(EXEC_FILE): dirs $(SRC_FILES)
 	g++ $(CFLAGS) $(INCLUDE_PARAMS) $(LIB_DIRS_PARAMS) -o $(BUILD_DIR)/$(EXEC_FILE) $(SRC_FILES)  $(LIBS_PARAMS) 
 
 run:
