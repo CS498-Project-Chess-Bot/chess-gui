@@ -15,7 +15,4 @@
 #include "app.hpp"
 #include "shader.hpp"
 
-
-
-
 #endif
