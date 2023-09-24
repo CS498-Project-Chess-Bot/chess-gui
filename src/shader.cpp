@@ -75,5 +75,6 @@ const std::string Shader::readShaderFileAsStr(const std::string& path) {
     {
         std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
     }
+    
     return shaderCode;
 }

@@ -13,6 +13,7 @@ LIBS_PARAMS = $(foreach l, $(LIBS), -l$l)
 
 OBJ_DIR = build/
 SRC_FILES = $(wildcard src/*.cpp) src/vendor/glad/src/glad.c
+HEADER_FILES = $(wildcard src/*.hpp)
 CFLAGS = -Wall -Werror -pedantic -std=c++23
 
 ifeq ($(OS), Windows_NT)
@@ -23,17 +24,15 @@ endif
 
 all: $(EXEC_FILE)
 
-build: dirs shaders
-
-dirs:
+build:
 	mkdir -p $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)/shaders
 	cp ./shaders/* $(BUILD_DIR)/shaders
 
-shaders:
+shaders: ./shaders/*
 	cp ./shaders/* $(BUILD_DIR)/shaders
 
-$(EXEC_FILE): dirs $(SRC_FILES)
+$(EXEC_FILE): $(SRC_FILES) $(HEADER_FILES) build shaders
 	g++ $(CFLAGS) $(INCLUDE_PARAMS) $(LIB_DIRS_PARAMS) -o $(BUILD_DIR)/$(EXEC_FILE) $(SRC_FILES)  $(LIBS_PARAMS) 
 
 run:
