@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 #include <cstdlib>
 #include <cassert>
 
@@ -14,5 +15,6 @@
 #include "helpers.hpp"
 #include "app.hpp"
 #include "shader.hpp"
+#include "buffer.hpp"
 
 #endif

@@ -9,8 +9,6 @@ public:
     Shader(const std::string& vertexPath, const std::string& fragmentPath);
     ~Shader();
 
-
-
     void bind() const;
 
 private:
