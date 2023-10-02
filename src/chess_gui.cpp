@@ -1,4 +1,5 @@
 #include "core.hpp"
+#include "app.hpp"
 
 // settings
 const unsigned int SCR_WIDTH = 800;
