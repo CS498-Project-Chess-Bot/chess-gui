@@ -1,8 +1,6 @@
 #include "core.hpp"
 #include "app.hpp"
-#include "shader.hpp"
-#include "vertex_array.hpp"
-#include "buffer.hpp"
+#include "renderer.hpp"
 
 
 App::App(int width, int height, const std::string title) {
@@ -34,6 +32,9 @@ App::App(int width, int height, const std::string title) {
         std::cerr << "ERROR::APP::FAILED TO INIT GLAD" << std::endl;
         exit(-1);
     } 
+
+    RenderCommand::init();
+
 }
 
 int App::run() {
@@ -62,7 +63,6 @@ int App::run() {
     VertexArray VAO;
     VAO.addVertexBuffer(VBO);
     VAO.setIndexBuffer(IBO);
-    std::cout << VAO;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -71,17 +71,13 @@ int App::run() {
         processInput();
 
         // render
-
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
         // draw our first triangle
         shader.bind();
         VAO.bind();
         //glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        RenderCommand::submit(VAO);
         // glBindVertexArray(0); // no need to unbind it every time 
-
-
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -91,6 +87,7 @@ int App::run() {
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
+    RenderCommand::exit();
     glfwTerminate();
     return 0;
 }
@@ -104,5 +101,5 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
+    RenderCommand::setViewport(width, height);
 }
