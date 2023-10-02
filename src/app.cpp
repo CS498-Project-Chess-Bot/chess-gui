@@ -39,6 +39,7 @@ App::App(int width, int height, const std::string title) {
 
 int App::run() {
     Shader shader("shaders/flat.vs", "shaders/flat.fs");
+    shader.setFloat("r", 0.7f);
     
 
     std::vector<float> vertices = {

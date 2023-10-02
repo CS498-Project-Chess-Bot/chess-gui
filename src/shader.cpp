@@ -80,3 +80,23 @@ const std::string Shader::readShaderFileAsStr(const std::string& path) {
     
     return shaderCode;
 }
+
+uint32_t Shader::getUniformLocation(const std::string& name) {
+    if(m_uniformMap.find(name) != m_uniformMap.end()) {
+        return m_uniformMap[name];
+    }
+
+    int32_t location = glGetUniformLocation(programID, name.c_str());
+    CORE_ASSERT(location != -1, "Uniform of this name does not exist!");
+    return m_uniformMap[name] = (uint32_t)location;
+}
+
+void Shader::setInt(const std::string& name, int32_t value) {
+    bind();
+    glUniform1i(getUniformLocation(name), value);
+}
+
+void Shader::setFloat(const std::string& name, float value) {
+    bind();
+    glUniform1f(getUniformLocation(name), value);
+}
