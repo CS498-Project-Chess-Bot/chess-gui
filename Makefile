@@ -1,7 +1,7 @@
 BUILD_DIR = build
 EXEC_FILE = chess-gui
 
-INCLUDE_DIRS = src/ vendor/glad/include vendor/glfw/include vendor/glm
+INCLUDE_DIRS = src/ vendor/glad/include vendor/glfw/include vendor/glm vendor/stb_image
 INCLUDE_PARAMS = $(foreach d, $(INCLUDE_DIRS), -I$d)
 
 ### library order matters! glfw3 needs to be before the others
@@ -19,6 +19,10 @@ GLAD_SRC = vendor/glad/src
 
 HEADER_FILES = $(wildcard src/*.hpp)
 SHADER_FILES = $(wildcard shaders/*.vs) $(wildcard shaders/*.fs)
+BUILD_SHADER_FILES = $(SHADER_FILES:%=$(BUILD_DIR)/%)
+TEXTURE_FILES = $(wildcard textures/*)
+BUILD_TEXTURE_FILES = $(TEXTURE_FILES:%=$(BUILD_DIR)/%)
+
 CFLAGS = -g -Wall -Werror -pedantic -std=c++23
 
 ifeq ($(OS), Windows_NT)
@@ -27,14 +31,18 @@ else
 EXEC_FILE = chess-gui-macos
 endif
 
-all: build shaders $(EXEC_FILE) 
+all: build $(BUILD_SHADER_FILES) $(BUILD_TEXTURE_FILES) $(EXEC_FILE) 
 
 build:
 	mkdir -p $(BUILD_DIR)
 
-shaders: $(SHADER_FILES)
+$(BUILD_SHADER_FILES): $(SHADER_FILES)
 	mkdir -p $(BUILD_DIR)/shaders
 	cp -r shaders $(BUILD_DIR)
+
+$(BUILD_TEXTURE_FILES): $(TEXTURE_FILES)
+	mkdir -p $(BUILD_DIR)/textures
+	cp -r textures $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 	g++ -c $(CFLAGS) -o $@ $< $(INCLUDE_PARAMS)

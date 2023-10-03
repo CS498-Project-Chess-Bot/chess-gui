@@ -2,6 +2,7 @@
 #define SHADER_HPP
 
 #include "core.hpp"
+#include "texture.hpp"
 #include <unordered_map>
 
 class Shader {
@@ -15,6 +16,8 @@ public:
     void setInt(const std::string& name, int32_t value);
 
     void setFloat(const std::string& name, float value);
+
+    void setTexture(const std::string& name, Texture& texture);
 
 
 private:

@@ -16,7 +16,15 @@ void Renderer::DestroyInstance() {
     }
 }
 
-void Renderer::submit(const VertexArray& vao) {
+Renderer::Renderer() {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void Renderer::submit(const VertexArray& vao, const Shader& shader, const Texture& texture) {
+    vao.bind();
+    shader.bind();
+    texture.bind();
     glDrawElements(GL_TRIANGLES, vao.getIndexBuffer().count(), GL_UNSIGNED_INT, nullptr);
 }
 
@@ -33,7 +41,7 @@ namespace RenderCommand {
 
     void init() { Renderer::GetInstance(); }
 
-    void submit(const VertexArray& vao) {Renderer::GetInstance()->submit(vao);}
+    void submit(const VertexArray& vao, const Shader& shader, const Texture& texture) {Renderer::GetInstance()->submit(vao, shader, texture);}
 
     void clear(float r, float g, float b, float a) {Renderer::GetInstance()->clear(r, g, b, a); }
 

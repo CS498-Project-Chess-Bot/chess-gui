@@ -100,3 +100,8 @@ void Shader::setFloat(const std::string& name, float value) {
     bind();
     glUniform1f(getUniformLocation(name), value);
 }
+
+void Shader::setTexture(const std::string& name, Texture& texture) {
+    bind();
+    glUniform1i(getUniformLocation(name), texture.slot());
+}
