@@ -38,18 +38,21 @@ App::App(int width, int height, const std::string title) {
 }
 
 int App::run() {
-    Shader shader("shaders/flat.vs", "shaders/flat.fs");
+    Shader shader("shaders/chess_piece.vs", "shaders/chess_piece.fs");
+    Texture texture("textures/chess_white_pawn.png");
+    shader.setTexture("textureSlot", texture);
     
 
     std::vector<float> vertices = {
-         0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left 
+         0.5f,  0.5f, 0.0f,     1.0f, 1.0f, // top right
+         0.5f, -0.5f, 0.0f,     1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f,     0.0f, 1.0f // top left 
     };
     VertexBuffer VBO(vertices);
     BufferLayout layout = {
-        BufferElement(ShaderDataType::Float3, "Position")
+        BufferElement(ShaderDataType::Float3, "Position"),
+        BufferElement(ShaderDataType::Float2, "TexCoord")
     };
     VBO.setLayout(layout);
 
@@ -72,11 +75,9 @@ int App::run() {
 
         // render
         RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
-        // draw our first triangle
-        shader.bind();
-        VAO.bind();
+        
         //glDrawArrays(GL_TRIANGLES, 0, 6);
-        RenderCommand::submit(VAO);
+        RenderCommand::submit(VAO, shader, texture);
         // glBindVertexArray(0); // no need to unbind it every time 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
