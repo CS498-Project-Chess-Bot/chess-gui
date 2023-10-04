@@ -1,9 +1,13 @@
 #include "core.hpp"
 #include "app.hpp"
 #include "renderer.hpp"
+#include "camera.hpp"
 
+uint32_t App::s_height = 0;
+uint32_t App::s_width = 0;
 
-App::App(int width, int height, const std::string title) {
+App::App(int width, int height, const std::string title) 
+{
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -34,6 +38,8 @@ App::App(int width, int height, const std::string title) {
     } 
 
     RenderCommand::init();
+    s_width = width;
+    s_height = height;
 
 }
 
@@ -67,6 +73,11 @@ int App::run() {
     VAO.addVertexBuffer(VBO);
     VAO.setIndexBuffer(IBO);
 
+    glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 1.0f));
+    shader.setMat4("model", model);
+
+    Camera camera({0.0f, 0.0f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
+
     while (!glfwWindowShouldClose(window))
     {
         // input
@@ -76,6 +87,14 @@ int App::run() {
         // render
         RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
         
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)s_width/(float)s_height, 0.1f, 100.0f);
+        //glm::mat4 projection = glm::mat4(1.0f);
+        shader.setMat4("projection", projection);
+
+        //glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+        //std::cout << camera.view()[3][3] << std:: endl;
+        shader.setMat4("view", camera.view());
+
         //glDrawArrays(GL_TRIANGLES, 0, 6);
         RenderCommand::submit(VAO, shader, texture);
         // glBindVertexArray(0); // no need to unbind it every time 
@@ -103,4 +122,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
     RenderCommand::setViewport(width, height);
+    App::s_width = width;
+    App::s_height = height;
 }

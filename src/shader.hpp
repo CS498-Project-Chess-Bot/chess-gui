@@ -17,6 +17,8 @@ public:
 
     void setFloat(const std::string& name, float value);
 
+    void setMat4(const std::string& name, glm::mat4& matrix);
+
     void setTexture(const std::string& name, Texture& texture);
 
 
