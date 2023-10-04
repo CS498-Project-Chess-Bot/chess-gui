@@ -24,6 +24,7 @@ TEXTURE_FILES = $(wildcard textures/*)
 BUILD_TEXTURE_FILES = $(TEXTURE_FILES:%=$(BUILD_DIR)/%)
 
 CFLAGS = -g -Wall -Werror -pedantic -std=c++23
+LFLAGS = -Wl,--allow-multiple-definition
 
 ifeq ($(OS), Windows_NT)
 EXEC_FILE = chess-gui-windows
@@ -44,6 +45,9 @@ $(BUILD_TEXTURE_FILES): $(TEXTURE_FILES)
 	mkdir -p $(BUILD_DIR)/textures
 	cp -r textures $(BUILD_DIR)
 
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
+	g++ -c $(CFLAGS) -o $@ $< $(INCLUDE_PARAMS)
+
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 	g++ -c $(CFLAGS) -o $@ $< $(INCLUDE_PARAMS)
 
@@ -51,7 +55,7 @@ $(BUILD_DIR)/glad.o : $(GLAD_SRC)/glad.c
 	g++ -c $(CFLAGS) -o $@ $< $(INCLUDE_PARAMS)
 
 $(EXEC_FILE): $(OBJ_FILES:%=$(BUILD_DIR)/%) $(BUILD_DIR)/glad.o 
-	g++ $(CFLAGS) $(INCLUDE_PARAMS) $(LIB_DIRS_PARAMS) -o $(BUILD_DIR)/$(EXEC_FILE) $^ $(LIBS_PARAMS) 
+	g++ $(CFLAGS) $(LFLAGS) $(INCLUDE_PARAMS) $(LIB_DIRS_PARAMS) -o $(BUILD_DIR)/$(EXEC_FILE) $^ $(LIBS_PARAMS) 
 
 run:
 	cd $(BUILD_DIR); ./$(EXEC_FILE)

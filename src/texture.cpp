@@ -31,5 +31,5 @@ Texture::~Texture() {
 
 void Texture::bind() const {
     glActiveTexture(GL_TEXTURE0 + m_slot);
-    glBindTexture(GL_TEXTURE, m_id);
+    glBindTexture(GL_TEXTURE_2D, m_id);
 }

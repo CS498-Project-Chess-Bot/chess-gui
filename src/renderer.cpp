@@ -22,6 +22,10 @@ Renderer::Renderer() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+void Renderer::beginScene(const Camera& camera) {
+    m_camera = std::make_shared<Camera>(camera);
+}
+
 void Renderer::submit(const VertexArray& vao, const Shader& shader, const Texture& texture) {
     vao.bind();
     shader.bind();
@@ -29,9 +33,36 @@ void Renderer::submit(const VertexArray& vao, const Shader& shader, const Textur
     glDrawElements(GL_TRIANGLES, vao.getIndexBuffer().count(), GL_UNSIGNED_INT, nullptr);
 }
 
-void Renderer::clear(float r, float g, float b, float a) {
-    glClearColor(r, g, b, a);
+void Renderer::submit(Object& obj) {
+    m_objects.push_back(obj);
+}
+
+void Renderer::endScene() {
+    CORE_ASSERT(m_camera, "Trying to render without beginning scene!");
+    CORE_ASSERT(m_objects.size(), "Trying to render without any objects!");
+
+    glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    for(Object& obj: m_objects) {
+        obj.vertexArray()->bind();
+        obj.texture()->bind();
+        obj.shader()->bind();
+        obj.shader()->setMat4("view", m_camera->view());
+        obj.shader()->setMat4("model", obj.transform().transform());
+        std::cout << "hello5\n";
+        std::cout << obj.vertexArray()->getIndexBuffer().count() << std::endl;
+        std::cout << obj.vertexArray()->getVertexBuffers()[0] << std::endl;
+        glDrawElements(GL_TRIANGLES, obj.vertexArray()->getIndexBuffer().count(), GL_UNSIGNED_INT, nullptr);
+        std::cout << "hello6\n";
+        glCheckError();
+    }
+     std::cout << "hello2\n";
+}
+
+void Renderer::clear(float r, float g, float b, float a) {
+    m_clearColor = glm::vec4(r,g,b,a);
+    
 }
     
 void Renderer::setViewport(uint32_t width, uint32_t height) {
@@ -42,7 +73,12 @@ namespace RenderCommand {
 
     void init() { Renderer::GetInstance(); }
 
+    void beginScene(const Camera& camera) {Renderer::GetInstance()->beginScene(camera);}
     void submit(const VertexArray& vao, const Shader& shader, const Texture& texture) {Renderer::GetInstance()->submit(vao, shader, texture);}
+    void submit(Object& obj) {Renderer::GetInstance()->submit(obj);}
+    void endScene() { Renderer::GetInstance()-> endScene(); }
+
+    
 
     void clear(float r, float g, float b, float a) {Renderer::GetInstance()->clear(r, g, b, a); }
 

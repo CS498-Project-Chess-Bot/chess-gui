@@ -2,6 +2,7 @@
 #include "app.hpp"
 #include "renderer.hpp"
 #include "camera.hpp"
+#include "chess_piece_2D.hpp"
 
 uint32_t App::s_height = 0;
 uint32_t App::s_width = 0;
@@ -44,37 +45,39 @@ App::App(int width, int height, const std::string title)
 }
 
 int App::run() {
-    Shader shader("shaders/chess_piece.vs", "shaders/chess_piece.fs");
-    Texture texture("textures/chess_white_pawn.png");
-    shader.setTexture("textureSlot", texture);
+    // Shader shader("shaders/chess_piece.vs", "shaders/chess_piece.fs");
+    // Texture texture("textures/chess_white_pawn.png");
+    // shader.setTexture("textureSlot", texture);
     
 
-    std::vector<float> vertices = {
-         0.5f,  0.5f, 0.0f,     1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,     1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,     0.0f, 1.0f // top left 
-    };
-    VertexBuffer VBO(vertices);
-    BufferLayout layout = {
-        BufferElement(ShaderDataType::Float3, "Position"),
-        BufferElement(ShaderDataType::Float2, "TexCoord")
-    };
-    VBO.setLayout(layout);
+    // std::vector<float> vertices = {
+    //      0.5f,  0.5f, 0.0f,     1.0f, 1.0f, // top right
+    //      0.5f, -0.5f, 0.0f,     1.0f, 0.0f, // bottom right
+    //     -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, // bottom left
+    //     -0.5f,  0.5f, 0.0f,     0.0f, 1.0f // top left 
+    // };
+    // VertexBuffer VBO(vertices);
+    // BufferLayout layout = {
+    //     BufferElement(ShaderDataType::Float3, "Position"),
+    //     BufferElement(ShaderDataType::Float2, "TexCoord")
+    // };
+    // VBO.setLayout(layout);
 
 
-    std::vector<uint32_t> indices = {  // note that we start from 0!
-        0, 1, 3,  // first Triangle
-        1, 2, 3   // second Triangle
-    };
-    IndexBuffer IBO(indices);
+    // std::vector<uint32_t> indices = {  // note that we start from 0!
+    //     0, 1, 3,  // first Triangle
+    //     1, 2, 3   // second Triangle
+    // };
+    // IndexBuffer IBO(indices);
 
-    VertexArray VAO;
-    VAO.addVertexBuffer(VBO);
-    VAO.setIndexBuffer(IBO);
+    // VertexArray VAO;
+    // VAO.addVertexBuffer(VBO);
+    // VAO.setIndexBuffer(IBO);
 
-    glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 1.0f));
-    shader.setMat4("model", model);
+    //glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 1.0f));
+    ChessPieceModel2D whitePawn(ChessPieceType::white_pawn);
+    whitePawn.transform().changePos({0.0f, 1.0f, 0.0f});
+    whitePawn.transform().changeScale({0.5f, 0.5f, 1.0f});
 
     Camera camera({0.0f, 0.0f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
 
@@ -85,18 +88,23 @@ int App::run() {
         processInput();
 
         // render
-        RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
         
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)s_width/(float)s_height, 0.1f, 100.0f);
+
+        RenderCommand::beginScene(camera);
+        RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
+        RenderCommand::submit(whitePawn);
+        RenderCommand::endScene();
+        
+        //glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)s_width/(float)s_height, 0.1f, 100.0f);
         //glm::mat4 projection = glm::mat4(1.0f);
-        shader.setMat4("projection", projection);
+        //shader.setMat4("projection", projection);
 
         //glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
         //std::cout << camera.view()[3][3] << std:: endl;
-        shader.setMat4("view", camera.view());
+        //shader.setMat4("view", camera.view());
 
         //glDrawArrays(GL_TRIANGLES, 0, 6);
-        RenderCommand::submit(VAO, shader, texture);
+        // RenderCommand::submit(VAO, shader, texture);
         // glBindVertexArray(0); // no need to unbind it every time 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
