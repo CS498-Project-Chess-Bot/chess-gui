@@ -30,14 +30,14 @@ void Renderer::submit(const VertexArray& vao, const Shader& shader, const Textur
     vao.bind();
     shader.bind();
     texture.bind();
-    glDrawElements(GL_TRIANGLES, vao.getIndexBuffer().count(), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_TRIANGLES, vao.getIndexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
 }
 
 void Renderer::submit(Object& obj) {
     m_objects.push_back(obj);
 }
 
-void Renderer::endScene() {
+void Renderer::endScene(uint32_t screenWidth, uint32_t screenHeight) {
     CORE_ASSERT(m_camera, "Trying to render without beginning scene!");
     CORE_ASSERT(m_objects.size(), "Trying to render without any objects!");
 
@@ -50,14 +50,14 @@ void Renderer::endScene() {
         obj.shader()->bind();
         obj.shader()->setMat4("view", m_camera->view());
         obj.shader()->setMat4("model", obj.transform().transform());
-        std::cout << "hello5\n";
-        std::cout << obj.vertexArray()->getIndexBuffer().count() << std::endl;
-        std::cout << obj.vertexArray()->getVertexBuffers()[0] << std::endl;
-        glDrawElements(GL_TRIANGLES, obj.vertexArray()->getIndexBuffer().count(), GL_UNSIGNED_INT, nullptr);
-        std::cout << "hello6\n";
-        glCheckError();
+
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
+        obj.shader()->setMat4("projection", projection);
+
+        glDrawElements(GL_TRIANGLES, obj.vertexArray()->getIndexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
     }
-     std::cout << "hello2\n";
+
+    m_objects.clear();
 }
 
 void Renderer::clear(float r, float g, float b, float a) {
@@ -76,7 +76,7 @@ namespace RenderCommand {
     void beginScene(const Camera& camera) {Renderer::GetInstance()->beginScene(camera);}
     void submit(const VertexArray& vao, const Shader& shader, const Texture& texture) {Renderer::GetInstance()->submit(vao, shader, texture);}
     void submit(Object& obj) {Renderer::GetInstance()->submit(obj);}
-    void endScene() { Renderer::GetInstance()-> endScene(); }
+    void endScene(uint32_t screenWidth, uint32_t screenHeight) { Renderer::GetInstance()-> endScene(screenWidth, screenHeight); }
 
     
 

@@ -24,7 +24,7 @@ public:
     void beginScene(const Camera& camera);
     void submit(const VertexArray& vao, const Shader& shader, const Texture& texture);
     void submit(Object& obj);
-    void endScene();
+    void endScene(uint32_t screenWidth, uint32_t screenHeight);
 
     void clear(float r, float g, float b, float a);
     void setViewport(uint32_t width, uint32_t height);
@@ -46,7 +46,7 @@ namespace RenderCommand {
     void beginScene(const Camera& camera);
     void submit(const VertexArray& vao, const Shader& shader, const Texture& texture);
     void submit(Object& obj);
-    void endScene();
+    void endScene(uint32_t screenWidth, uint32_t screenHeight);
 
     void clear(float r, float g, float b, float a);
 

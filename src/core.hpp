@@ -8,6 +8,7 @@
 #include <vector>
 #include <cstdlib>
 #include <cassert>
+#include <memory>
 
 #include <glad/glad.h>
 #include <glfw/glfw3.h>

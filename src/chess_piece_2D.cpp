@@ -43,14 +43,14 @@ ChessPieceModel2D::ChessPieceModel2D(ChessPieceType type)
     : m_type(type)
 {
 
-    VertexBuffer vbo(QUAD_VERTICES);
+    std::shared_ptr<VertexBuffer> vbo = std::make_shared<VertexBuffer>(QUAD_VERTICES);
     BufferLayout layout = {
         BufferElement(ShaderDataType::Float3, "Position"),
         BufferElement(ShaderDataType::Float2, "TexCoord")
     };
-    vbo.setLayout(layout);
+    vbo->setLayout(layout);
 
-    IndexBuffer ibo(QUAD_INDICES);
+    std::shared_ptr<IndexBuffer> ibo = std::make_shared<IndexBuffer>(QUAD_INDICES);
 
     m_VAO = std::make_shared<VertexArray>();
     m_VAO->addVertexBuffer(vbo);
