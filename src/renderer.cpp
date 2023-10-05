@@ -20,6 +20,8 @@ Renderer::Renderer() {
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearDepth(1.0f);
+    glDepthFunc(GL_LEQUAL);
 }
 
 void Renderer::beginScene(const Camera& camera) {
@@ -44,6 +46,9 @@ void Renderer::endScene(uint32_t screenWidth, uint32_t screenHeight) {
     glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    std::sort(m_objects.begin(), m_objects.end(), [](Object& lhs, Object& rhs) {
+      return lhs.transform().pos().z < rhs.transform().pos().z;
+    });
     for(Object& obj: m_objects) {
         obj.vertexArray()->bind();
         obj.texture()->bind();

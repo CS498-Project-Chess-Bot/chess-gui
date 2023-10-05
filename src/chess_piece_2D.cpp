@@ -4,6 +4,7 @@
 static std::string getChessPieceFragShaderLoc(ChessPieceType type) {
     switch(type) {
         case ChessPieceType::white_pawn:
+        case ChessPieceType::black_king:
             return "shaders/chess_piece.fs";
             break;
         default:
@@ -15,6 +16,7 @@ static std::string getChessPieceFragShaderLoc(ChessPieceType type) {
 static std::string getChessPieceVertShaderLoc(ChessPieceType type) {
     switch(type) {
         case ChessPieceType::white_pawn:
+        case ChessPieceType::black_king:
             return "shaders/chess_piece.vs";
             break;
         default:
@@ -28,6 +30,8 @@ static std::string getChessPieceTextureLoc(ChessPieceType type) {
         case ChessPieceType::white_pawn:
             return "textures/chess_white_pawn.png";
             break;
+        case ChessPieceType::black_king:
+            return "textures/chess_black_king.png";
         default:
             CORE_ASSERT(false, "This chess piece doesn't have a fragment shader!");
             return "";

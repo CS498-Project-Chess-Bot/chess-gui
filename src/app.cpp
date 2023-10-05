@@ -47,6 +47,8 @@ App::App(int width, int height, const std::string title)
 int App::run() {
     
     ChessPieceModel2D whitePawn(ChessPieceType::white_pawn);
+    ChessPieceModel2D blackKing(ChessPieceType::black_king);
+    blackKing.transform().changePos({0.0f, 0.0f, -2.0f});
     whitePawn.transform().changeScale({0.5f, 0.5f, 1.0f});
     whitePawn.transform().changeRotation({0.0f, 0.0f, 45.0f});
 
@@ -61,14 +63,16 @@ int App::run() {
 
         
         // render
-        whitePawn.transform().changePos({0.0f, i , 0.0f});
+        whitePawn.transform().changePos({0.0f, i , 1.0f});
         i+=0.0005;
         if(i > 5.0f)
             i = -5.0f;
 
         RenderCommand::beginScene(camera);
         RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
+        RenderCommand::submit(blackKing);
         RenderCommand::submit(whitePawn);
+     
         RenderCommand::endScene(s_width, s_height);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

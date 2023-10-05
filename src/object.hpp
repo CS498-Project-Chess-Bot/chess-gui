@@ -17,6 +17,7 @@ public:
     inline glm::mat4& transform() { return m_transform; }
 
     inline void changePos(glm::vec3 _pos) { m_pos = _pos; recalculateTransform(); }
+    inline glm::vec3& pos() {return m_pos;}
     inline void changeScale(glm::vec3 _scale) { m_scale = _scale; recalculateTransform(); }
     inline void changeRotation(glm::vec3 _rotation) { m_rotation = _rotation; recalculateTransform(); }
 
