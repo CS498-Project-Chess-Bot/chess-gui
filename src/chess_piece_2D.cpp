@@ -47,22 +47,22 @@ ChessPieceModel2D::ChessPieceModel2D(ChessPieceType type)
     : m_type(type)
 {
 
-    std::shared_ptr<VertexBuffer> vbo = std::make_shared<VertexBuffer>(QUAD_VERTICES);
+    Ref<VertexBuffer> vbo = createRef<VertexBuffer>(QUAD_VERTICES);
     BufferLayout layout = {
         BufferElement(ShaderDataType::Float3, "Position"),
         BufferElement(ShaderDataType::Float2, "TexCoord")
     };
     vbo->setLayout(layout);
 
-    std::shared_ptr<IndexBuffer> ibo = std::make_shared<IndexBuffer>(QUAD_INDICES);
+    Ref<IndexBuffer> ibo = createRef<IndexBuffer>(QUAD_INDICES);
 
-    m_VAO = std::make_shared<VertexArray>();
+    m_VAO = createRef<VertexArray>();
     m_VAO->addVertexBuffer(vbo);
     m_VAO->setIndexBuffer(ibo);
 
-    m_shader = std::make_shared<Shader>(getChessPieceVertShaderLoc(type).c_str(), getChessPieceFragShaderLoc(type).c_str());
+    m_shader = createRef<Shader>(getChessPieceVertShaderLoc(type).c_str(), getChessPieceFragShaderLoc(type).c_str());
     
-    m_texture = std::make_shared<Texture>(getChessPieceTextureLoc(type).c_str());
+    m_texture = createRef<Texture>(getChessPieceTextureLoc(type).c_str());
     m_shader->setTexture("textureSlot", *m_texture);
 
 }

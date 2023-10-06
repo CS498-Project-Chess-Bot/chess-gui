@@ -23,7 +23,7 @@ public:
 
     void beginScene(const Camera& camera);
     void submit(const VertexArray& vao, const Shader& shader, const Texture& texture);
-    void submit(Object& obj);
+    void submit(Ref<Object>& obj);
     void endScene(uint32_t screenWidth, uint32_t screenHeight);
 
     void clear(float r, float g, float b, float a);
@@ -33,7 +33,7 @@ public:
     static void DestroyInstance();
 
 private:
-    std::vector<Object> m_objects;
+    std::vector<Ref<Object>> m_objects;
     std::shared_ptr<Camera> m_camera;
     glm::vec4 m_clearColor;
 
@@ -45,7 +45,7 @@ namespace RenderCommand {
 
     void beginScene(const Camera& camera);
     void submit(const VertexArray& vao, const Shader& shader, const Texture& texture);
-    void submit(Object& obj);
+    void submit(Ref<Object>& obj);
     void endScene(uint32_t screenWidth, uint32_t screenHeight);
 
     void clear(float r, float g, float b, float a);

@@ -25,7 +25,7 @@ Renderer::Renderer() {
 }
 
 void Renderer::beginScene(const Camera& camera) {
-    m_camera = std::make_shared<Camera>(camera);
+    m_camera = createRef<Camera>(camera);
 }
 
 void Renderer::submit(const VertexArray& vao, const Shader& shader, const Texture& texture) {
@@ -35,8 +35,13 @@ void Renderer::submit(const VertexArray& vao, const Shader& shader, const Textur
     glDrawElements(GL_TRIANGLES, vao.getIndexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
 }
 
-void Renderer::submit(Object& obj) {
+void Renderer::submit(Ref<Object>& obj) {
+    obj->passTransformToChildren();
+    for(auto& child : obj->getChildren()) {
+        m_objects.push_back(child);
+    }
     m_objects.push_back(obj);
+    
 }
 
 void Renderer::endScene(uint32_t screenWidth, uint32_t screenHeight) {
@@ -46,20 +51,20 @@ void Renderer::endScene(uint32_t screenWidth, uint32_t screenHeight) {
     glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    std::sort(m_objects.begin(), m_objects.end(), [](Object& lhs, Object& rhs) {
-      return lhs.transform().pos().z < rhs.transform().pos().z;
+    std::sort(m_objects.begin(), m_objects.end(), [](Ref<Object>& lhs, Ref<Object>& rhs) {
+      return lhs->transform().pos().z < rhs->transform().pos().z;
     });
-    for(Object& obj: m_objects) {
-        obj.vertexArray()->bind();
-        obj.texture()->bind();
-        obj.shader()->bind();
-        obj.shader()->setMat4("view", m_camera->view());
-        obj.shader()->setMat4("model", obj.transform().transform());
+    for(Ref<Object>& obj: m_objects) {
+        obj->vertexArray()->bind();
+        obj->texture()->bind();
+        obj->shader()->bind();
+        obj->shader()->setMat4("view", m_camera->view());
+        obj->shader()->setMat4("model", obj->transform().transform());
 
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
-        obj.shader()->setMat4("projection", projection);
+        obj->shader()->setMat4("projection", projection);
 
-        glDrawElements(GL_TRIANGLES, obj.vertexArray()->getIndexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, obj->vertexArray()->getIndexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
     }
 
     m_objects.clear();
@@ -80,7 +85,7 @@ namespace RenderCommand {
 
     void beginScene(const Camera& camera) {Renderer::GetInstance()->beginScene(camera);}
     void submit(const VertexArray& vao, const Shader& shader, const Texture& texture) {Renderer::GetInstance()->submit(vao, shader, texture);}
-    void submit(Object& obj) {Renderer::GetInstance()->submit(obj);}
+    void submit(Ref<Object>& obj) {Renderer::GetInstance()->submit(obj);}
     void endScene(uint32_t screenWidth, uint32_t screenHeight) { Renderer::GetInstance()-> endScene(screenWidth, screenHeight); }
 
     

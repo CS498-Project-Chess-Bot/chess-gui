@@ -20,9 +20,9 @@ public:
     inline glm::vec3& pos() {return m_pos;}
     inline void changeScale(glm::vec3 _scale) { m_scale = _scale; recalculateTransform(); }
     inline void changeRotation(glm::vec3 _rotation) { m_rotation = _rotation; recalculateTransform(); }
+    void recalculateTransform();
 
 private:
-    void recalculateTransform();
 
     glm::vec3 m_pos, m_scale, m_rotation;
     glm::mat4 m_transform;
@@ -43,6 +43,16 @@ public:
     inline std::shared_ptr<Shader>& shader() { return m_shader; }
     inline std::shared_ptr<Texture>& texture() { return m_texture; }
 
+    inline void addChild(const Ref<Object>& child) { m_children.push_back(child); }
+    inline std::vector<Ref<Object>>& getChildren() {return m_children; }
+    inline void passTransformToChildren()
+    { 
+        for(auto& child : m_children) {
+            child->transform().recalculateTransform();
+            child->transform().transform() *= m_transform.transform();
+        }
+    }
+
 
 protected:
     std::shared_ptr<VertexArray> m_VAO;
@@ -50,6 +60,7 @@ protected:
     std::shared_ptr<Texture> m_texture;
 
     Transform m_transform;
+    std::vector<Ref<Object>> m_children;
 
 };
 

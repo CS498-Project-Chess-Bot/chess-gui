@@ -3,6 +3,7 @@
 #include "renderer.hpp"
 #include "camera.hpp"
 #include "chess_piece_2D.hpp"
+#include "timestep.hpp"
 
 uint32_t App::s_height = 0;
 uint32_t App::s_width = 0;
@@ -46,11 +47,12 @@ App::App(int width, int height, const std::string title)
 
 int App::run() {
     
-    ChessPieceModel2D whitePawn(ChessPieceType::white_pawn);
-    ChessPieceModel2D blackKing(ChessPieceType::black_king);
-    blackKing.transform().changePos({0.0f, 0.0f, -2.0f});
-    whitePawn.transform().changeScale({0.5f, 0.5f, 1.0f});
-    whitePawn.transform().changeRotation({0.0f, 0.0f, 45.0f});
+    Ref<Object> whitePawn = createRef<ChessPieceModel2D>(ChessPieceType::white_pawn);
+    Ref<Object> blackKing = createRef<ChessPieceModel2D>(ChessPieceType::black_king);
+    blackKing->transform().changePos({0.0f, 0.0f, -2.0f});
+    whitePawn->transform().changeScale({0.5f, 0.5f, 1.0f});
+    whitePawn->transform().changeRotation({0.0f, 0.0f, 45.0f});
+    whitePawn->addChild(blackKing);
 
     Camera camera({0.0f, 0.0f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
 
@@ -61,18 +63,21 @@ int App::run() {
         // -----
         processInput();
 
+        float time = (float)glfwGetTime();
+		Timestep deltaTime = time - m_lastFrameTime;
+		m_lastFrameTime = time;
+
         
         // render
-        whitePawn.transform().changePos({0.0f, i , 1.0f});
-        i+=0.0005;
+        whitePawn->transform().changePos({2.0f, i , 1.0f});
+        i += 0.01f * deltaTime.GetMilliseconds();
         if(i > 5.0f)
             i = -5.0f;
 
+
         RenderCommand::beginScene(camera);
         RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
-        RenderCommand::submit(blackKing);
         RenderCommand::submit(whitePawn);
-     
         RenderCommand::endScene(s_width, s_height);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
