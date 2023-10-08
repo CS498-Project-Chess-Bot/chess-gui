@@ -55,8 +55,15 @@ void Renderer::endScene(uint32_t screenWidth, uint32_t screenHeight) {
       return lhs->transform().pos().z < rhs->transform().pos().z;
     });
     for(Ref<Object>& obj: m_objects) {
+        if(!obj->vertexArray()) 
+            CORE_ASSERT(false, "Trying to render without a vertex array!");
         obj->vertexArray()->bind();
-        obj->texture()->bind();
+
+        if(obj->texture())
+            obj->texture()->bind();
+
+        if(!obj->shader())
+            CORE_ASSERT(false, "Trying to render without a shader!");
         obj->shader()->bind();
         obj->shader()->setMat4("view", m_camera->view());
         obj->shader()->setMat4("model", obj->transform().transform());
@@ -64,6 +71,7 @@ void Renderer::endScene(uint32_t screenWidth, uint32_t screenHeight) {
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
         obj->shader()->setMat4("projection", projection);
 
+        obj->setExtraUniforms();
         glDrawElements(GL_TRIANGLES, obj->vertexArray()->getIndexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
     }
 

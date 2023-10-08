@@ -4,14 +4,14 @@
 #include "core.hpp"
 #include "object.hpp"
 
-const static std::vector<float> QUAD_VERTICES = {
+const static std::vector<float> PIECE_QUAD_VERTICES = {
          0.5f,  0.5f, 0.0f,     1.0f, 1.0f, // top right
          0.5f, -0.5f, 0.0f,     1.0f, 0.0f, // bottom right
         -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, // bottom left
         -0.5f,  0.5f, 0.0f,     0.0f, 1.0f  // top left 
     };
 
-const static std::vector<uint32_t> QUAD_INDICES = {  // note that we start from 0!
+const static std::vector<uint32_t> PIECE_QUAD_INDICES = {  // note that we start from 0!
         0, 1, 3,  // first Triangle
         1, 2, 3   // second Triangle
     };
@@ -38,7 +38,7 @@ public:
     ChessPieceModel2D(ChessPieceType type);
     ~ChessPieceModel2D() override;
 
-    void setExtraUniforms();    
+    void setExtraUniforms() override;    
 
 private:
     ChessPieceType m_type;

@@ -47,14 +47,14 @@ ChessPieceModel2D::ChessPieceModel2D(ChessPieceType type)
     : m_type(type)
 {
 
-    Ref<VertexBuffer> vbo = createRef<VertexBuffer>(QUAD_VERTICES);
+    Ref<VertexBuffer> vbo = createRef<VertexBuffer>(PIECE_QUAD_VERTICES);
     BufferLayout layout = {
         BufferElement(ShaderDataType::Float3, "Position"),
         BufferElement(ShaderDataType::Float2, "TexCoord")
     };
     vbo->setLayout(layout);
 
-    Ref<IndexBuffer> ibo = createRef<IndexBuffer>(QUAD_INDICES);
+    Ref<IndexBuffer> ibo = createRef<IndexBuffer>(PIECE_QUAD_INDICES);
 
     m_VAO = createRef<VertexArray>();
     m_VAO->addVertexBuffer(vbo);

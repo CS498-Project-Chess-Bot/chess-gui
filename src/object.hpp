@@ -37,8 +37,6 @@ public:
     
     inline Transform& transform() { return m_transform; }
 
-    void setExtraUniforms();
-
     inline std::shared_ptr<VertexArray>& vertexArray() { return m_VAO; }
     inline std::shared_ptr<Shader>& shader() { return m_shader; }
     inline std::shared_ptr<Texture>& texture() { return m_texture; }
@@ -52,6 +50,8 @@ public:
             child->transform().transform() *= m_transform.transform();
         }
     }
+
+    inline virtual void setExtraUniforms() {};
 
 
 protected:

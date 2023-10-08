@@ -101,7 +101,12 @@ void Shader::setFloat(const std::string& name, float value) {
     glUniform1f(getUniformLocation(name), value);
 }
 
-void Shader::setMat4(const std::string& name, glm::mat4& matrix) {
+void Shader::setFloat4(const std::string& name, const glm::vec4& values) {
+    bind();
+    glUniform4f(getUniformLocation(name), values.r, values.g, values.b, values.a);
+}
+
+void Shader::setMat4(const std::string& name, const glm::mat4& matrix) {
     bind();
     glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 }
