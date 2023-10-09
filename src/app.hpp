@@ -17,6 +17,10 @@ private:
 private:
     GLFWwindow* window;
 
+public:
+    static uint32_t s_width, s_height;
+    float m_lastFrameTime = 0;
+
 };
 
 #endif

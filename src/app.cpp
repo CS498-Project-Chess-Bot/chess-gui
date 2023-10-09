@@ -1,9 +1,16 @@
 #include "core.hpp"
 #include "app.hpp"
 #include "renderer.hpp"
+#include "camera.hpp"
+#include "chess_piece_2D.hpp"
+#include "chess_tile_2D.hpp"
+#include "timestep.hpp"
 
+uint32_t App::s_height = 0;
+uint32_t App::s_width = 0;
 
-App::App(int width, int height, const std::string title) {
+App::App(int width, int height, const std::string title) 
+{
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -34,38 +41,29 @@ App::App(int width, int height, const std::string title) {
     } 
 
     RenderCommand::init();
+    s_width = width;
+    s_height = height;
 
 }
 
 int App::run() {
-    Shader shader("shaders/chess_piece.vs", "shaders/chess_piece.fs");
-    Texture texture("textures/chess_white_pawn.png");
-    shader.setTexture("textureSlot", texture);
     
+    std::vector<Ref<Object>> board;
+    for(int y = 0; y < 8; y++) {
+        for(int x = 0; x < 8; x++) {
+            bool isWhite = ((y*8)+x+(y%2))%2;
+            Ref<Object> tile = createRef<ChessTileModel2D>(isWhite);
+            tile->transform().changePos({x*1.0f, y*1.0f, -8.0f});
+            board.push_back(tile);
+        }
+    }
+    
+    Ref<Object> whitePawn = createRef<ChessPieceModel2D>(ChessPieceType::white_pawn);
+    board.front()->addChild(whitePawn);
+    Ref<Object> blackKing = createRef<ChessPieceModel2D>(ChessPieceType::black_king);
+    board.back()->addChild(blackKing);
 
-    std::vector<float> vertices = {
-         0.5f,  0.5f, 0.0f,     1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,     1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,     0.0f, 1.0f // top left 
-    };
-    VertexBuffer VBO(vertices);
-    BufferLayout layout = {
-        BufferElement(ShaderDataType::Float3, "Position"),
-        BufferElement(ShaderDataType::Float2, "TexCoord")
-    };
-    VBO.setLayout(layout);
-
-
-    std::vector<uint32_t> indices = {  // note that we start from 0!
-        0, 1, 3,  // first Triangle
-        1, 2, 3   // second Triangle
-    };
-    IndexBuffer IBO(indices);
-
-    VertexArray VAO;
-    VAO.addVertexBuffer(VBO);
-    VAO.setIndexBuffer(IBO);
+    Camera camera({3.0f, 3.0f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
 
     while (!glfwWindowShouldClose(window))
     {
@@ -73,12 +71,20 @@ int App::run() {
         // -----
         processInput();
 
-        // render
-        RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
+        float time = (float)glfwGetTime();
+		Timestep deltaTime = time - m_lastFrameTime;
+		m_lastFrameTime = time;
+        (void)deltaTime;
+
         
-        //glDrawArrays(GL_TRIANGLES, 0, 6);
-        RenderCommand::submit(VAO, shader, texture);
-        // glBindVertexArray(0); // no need to unbind it every time 
+        // render
+
+        RenderCommand::beginScene(camera);
+        RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
+        for(auto& tile: board) {
+            RenderCommand::submit(tile);
+        }
+        RenderCommand::endScene(s_width, s_height);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -103,4 +109,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
     RenderCommand::setViewport(width, height);
+    App::s_width = width;
+    App::s_height = height;
 }
