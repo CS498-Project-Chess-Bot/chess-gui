@@ -20,6 +20,8 @@ private:
 public:
     static uint32_t s_width, s_height;
     float m_lastFrameTime = 0;
+    int m_oldMouseState = GL_NONE;
+    double m_mousePressed_x = -1, m_mousePressed_y = -1;
 
 };
 
