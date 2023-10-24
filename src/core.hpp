@@ -9,7 +9,9 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cassert>
+#include <unordered_map>
 #include <memory>
+#include <filesystem>
 
 #include <glad/glad.h>
 #include <glfw/glfw3.h>

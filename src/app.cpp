@@ -5,6 +5,7 @@
 #include "chess_piece_2D.hpp"
 #include "chess_tile_2D.hpp"
 #include "timestep.hpp"
+#include "texture_loader.hpp"
 
 uint32_t App::s_height = 0;
 uint32_t App::s_width = 0;
@@ -41,29 +42,43 @@ App::App(int width, int height, const std::string title)
     } 
 
     RenderCommand::init();
+    TextureLoader::GetInstance();
     s_width = width;
     s_height = height;
 
 }
 
 int App::run() {
-    
-    std::vector<Ref<Object>> board;
+    using enum ChessPieceType;
+    std::vector<ChessPieceType> boardState = {
+        white_rook, white_knight, white_bishop, white_queen, white_king, white_bishop, white_knight, white_rook,
+        white_pawn, white_pawn,   white_pawn,   white_pawn,  white_pawn, white_pawn,   white_pawn,   white_pawn,
+        none,       none,         none,         none,        none,       none,         none,         none,
+        none,       none,         none,         none,        none,       none,         none,         none,
+        none,       none,         none,         none,        none,       none,         none,         none,
+        none,       none,         none,         none,        none,       none,         none,         none,
+        black_pawn, black_pawn,   black_pawn,   black_pawn,  black_pawn, black_pawn,   black_pawn,   black_pawn,
+        black_rook, black_knight, black_bishop, black_queen, black_king, black_bishop, black_knight, black_rook,
+    };
+
+
+    std::vector<Ref<Object>> boardModel;
     for(int y = 0; y < 8; y++) {
         for(int x = 0; x < 8; x++) {
             bool isWhite = ((y*8)+x+(y%2))%2;
             Ref<Object> tile = createRef<ChessTileModel2D>(isWhite);
             tile->transform().changePos({x*1.0f, y*1.0f, -8.0f});
-            board.push_back(tile);
+
+            int idx = 8*y + x;
+            if(boardState[idx] != none){
+                Ref<Object> piece = createRef<ChessPieceModel2D>(boardState[idx]);
+                tile->addChild(piece);
+            }
+            boardModel.push_back(tile);
         }
     }
-    
-    Ref<Object> whitePawn = createRef<ChessPieceModel2D>(ChessPieceType::white_pawn);
-    board.front()->addChild(whitePawn);
-    Ref<Object> blackKing = createRef<ChessPieceModel2D>(ChessPieceType::black_king);
-    board.back()->addChild(blackKing);
 
-    Camera camera({3.0f, 3.0f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
+    Camera camera({3.5f, 3.5f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
 
     while (!glfwWindowShouldClose(window))
     {
@@ -81,7 +96,7 @@ int App::run() {
 
         RenderCommand::beginScene(camera);
         RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
-        for(auto& tile: board) {
+        for(auto& tile : boardModel) {
             RenderCommand::submit(tile);
         }
         RenderCommand::endScene(s_width, s_height);
