@@ -20,10 +20,14 @@ public:
     ChessTileModel2D(bool isWhiteTile = true);
     ~ChessTileModel2D() override;
 
+    bool checkRayIntersectsTile(glm::vec3 rayOrigin, glm::vec3 rayDir);
+    void setHighlight(bool b) { m_highlighted = b; }
+
     void setExtraUniforms() override;  
 
 private:
     bool m_isWhiteTile;
+    bool m_highlighted = false;
 
 };
 

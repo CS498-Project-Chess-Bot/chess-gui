@@ -18,7 +18,6 @@ void TextureLoader::DestroyInstance() {
 
 TextureLoader::TextureLoader() {
     for (const auto& file : std::filesystem::directory_iterator(TEXTURE_DIR)) {
-        std::cout << file.path().filename().string() << std::endl;
         std::string texture_file = file.path().filename().string();
         m_textureMap[texture_file] = createRef<Texture>(std::string(TEXTURE_DIR) + "/" + texture_file);
     }

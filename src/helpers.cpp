@@ -20,3 +20,7 @@ GLenum glCheckError_(const char *file, int line)
     }
     return errorCode;
 }
+
+void printVec3(glm::vec3 v) {
+    std::cout << v.x << ", " << v.y << ", " << v.z << std::endl;
+}

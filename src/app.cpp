@@ -10,6 +10,8 @@
 uint32_t App::s_height = 0;
 uint32_t App::s_width = 0;
 
+static glm::vec3 mousePosToWorld(double& x, double& y, Camera cam, glm::mat4 proj, int screenWidth, int screenHeight);
+
 App::App(int width, int height, const std::string title) 
 {
     // glfw: initialize and configure
@@ -62,16 +64,16 @@ int App::run() {
     };
 
 
-    std::vector<Ref<Object>> boardModel;
+    std::vector<Ref<ChessTileModel2D>> boardModel;
     for(int y = 0; y < 8; y++) {
         for(int x = 0; x < 8; x++) {
             bool isWhite = ((y*8)+x+(y%2))%2;
-            Ref<Object> tile = createRef<ChessTileModel2D>(isWhite);
+            Ref<ChessTileModel2D> tile = createRef<ChessTileModel2D>(isWhite);
             tile->transform().changePos({x*1.0f, y*1.0f, -8.0f});
 
             int idx = 8*y + x;
             if(boardState[idx] != none){
-                Ref<Object> piece = createRef<ChessPieceModel2D>(boardState[idx]);
+                Ref<ChessPieceModel2D> piece = createRef<ChessPieceModel2D>(boardState[idx]);
                 tile->addChild(piece);
             }
             boardModel.push_back(tile);
@@ -85,6 +87,24 @@ int App::run() {
         // input
         // -----
         processInput();
+        if(m_mousePressed_x != -1 && m_mousePressed_y != -1) {
+            glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)s_width/(float)s_height, 0.1f, 100.0f);
+            glm::vec3 mouseWorld = mousePosToWorld(m_mousePressed_x, m_mousePressed_y, camera, projection, s_width, s_height);
+            glm::vec3 raydir = camera.pos() - mouseWorld;
+
+            for(auto& tile : boardModel) {
+                bool hits = tile->checkRayIntersectsTile(camera.pos(), glm::normalize(raydir));
+                if(hits) {
+                    for(auto& tile : boardModel) {
+                        tile->setHighlight(false);
+                    }
+                    tile->setHighlight(true);
+                    break;
+                     
+                }
+            }
+
+        }
 
         float time = (float)glfwGetTime();
 		Timestep deltaTime = time - m_lastFrameTime;
@@ -97,7 +117,8 @@ int App::run() {
         RenderCommand::beginScene(camera);
         RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
         for(auto& tile : boardModel) {
-            RenderCommand::submit(tile);
+            Ref<Object> submittableTile = tile;
+            RenderCommand::submit(submittableTile);
         }
         RenderCommand::endScene(s_width, s_height);
 
@@ -117,6 +138,14 @@ int App::run() {
 void App::processInput() {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    m_mousePressed_x = -1;
+    m_mousePressed_y = -1;
+    int currentMouseState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+    if(currentMouseState == GLFW_RELEASE && m_oldMouseState == GLFW_PRESS) {
+        glfwGetCursorPos(window, &m_mousePressed_x, &m_mousePressed_y);
+    }
+    m_oldMouseState = currentMouseState;
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -126,4 +155,18 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     RenderCommand::setViewport(width, height);
     App::s_width = width;
     App::s_height = height;
+}
+
+static glm::vec3 mousePosToWorld(double& x, double& y, Camera cam, glm::mat4 proj, int screenWidth, int screenHeight) {
+    glm::mat4 invMat = glm::inverse(proj * cam.view());
+
+    double normalizedX = x / (screenWidth/2) - 1;
+    double normalizedY = -(y / (screenHeight/2) - 1);
+
+    double z = cam.pos().z + cam.forward().z;
+    glm::vec4 mousePos = {normalizedX, normalizedY, z, 1};
+
+    mousePos = invMat * mousePos;
+    mousePos /= mousePos.w;
+    return glm::vec3(mousePos.x, mousePos.y, mousePos.z);
 }
