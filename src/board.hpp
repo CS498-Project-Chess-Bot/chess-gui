@@ -2,12 +2,14 @@
 #define BOARD_HPP
 
 #include "core.hpp"
+#include "chess_piece_2D.hpp"
+#include "move.hpp"
 
 class Board{
 public:
-	Board(String FEN);
+	Board(std::string FEN);
 	~Board();
-	void makeMove(Move);
+	void makeMove(Move moveObject);
 	bool isCheckMate();
 	bool isStalemate();
 	void resetBoard();
@@ -22,16 +24,16 @@ public:
 		none,       none,         none,         none,        none,       none,         none,         none,
 		none,       none,         none,         none,        none,       none,         none,         none,
 		black_pawn, black_pawn,   black_pawn,   black_pawn,  black_pawn, black_pawn,   black_pawn,   black_pawn,
-		black_rook, black_knight, black_bishop, black_queen, black_king, black_bishop, black_knight, black_rook,
+		black_rook, black_knight, black_bishop, black_queen, black_king, black_bishop, black_knight, black_rook
 	};
-	ChessPieceType boardState[m_rows][m_cols] = {};
+	ChessPieceType boardState[8][8] = {};
 	
 
 private:
 	bool isMoveValid(Move);
 	int m_turns;
 	bool m_color = 1; // negative when white, positive when black
-	static int m_rows = 7;
-	static int m_cols = 7;
+	const static int m_rows = 8;
+	const static int m_cols = 8;
 }
 #endif
