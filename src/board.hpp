@@ -5,7 +5,7 @@
 #include "chess_piece_2D.hpp"
 #include "move.hpp"
 
-class Board{
+class Board {
 public:
 	Board(std::string FEN);
 	~Board();
@@ -15,6 +15,14 @@ public:
 	void resetBoard();
 	int getTurnCount();
 
+
+private:
+	bool isMoveValid(Move);
+	int m_turns;
+	int m_captureCount = 0;
+	bool m_color = true; // true when white, false when black
+	const static int m_rows = 8;
+	const static int m_cols = 8;
 	using enum ChessPieceType;
 	ChessPieceType defaultBoard[8][8] = {
 		white_rook, white_knight, white_bishop, white_queen, white_king, white_bishop, white_knight, white_rook,
@@ -27,13 +35,5 @@ public:
 		black_rook, black_knight, black_bishop, black_queen, black_king, black_bishop, black_knight, black_rook
 	};
 	ChessPieceType boardState[8][8] = {};
-	
-
-private:
-	bool isMoveValid(Move);
-	int m_turns;
-	bool m_color = 1; // negative when white, positive when black
-	const static int m_rows = 8;
-	const static int m_cols = 8;
-}
+};
 #endif

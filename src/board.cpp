@@ -1,10 +1,10 @@
 #include "board.hpp"
+using enum ChessPieceType;
 
 // Reads in FEN string and converts it to 2D array
 // TODO: add castling availability, en passant target square, halfmove clock, and fullmove number
 Board::Board(std::string FEN)
 {
-    using enum ChessPieceType;
     int row = 8;
     int col = 0;
     ChessPieceType piece;
@@ -26,9 +26,9 @@ Board::Board(std::string FEN)
         // Active color
         else if (c == 'b' || c == 'w') {
             if (c == 'b')
-                m_color = 1;
+                m_color = false;
             else
-                m_color = -1;
+                m_color = true;
         }
         // piece case
         else {
@@ -50,20 +50,26 @@ Board::Board(std::string FEN)
             boardState[row][col] = piece;
         }
     }
-    
-   
 }
 
-Board::~Board(){}
+Board::~Board(){
+    m_turns = 0;
+    m_captureCount = 0;
+    resetBoard();
+}
 
-// Pass in inputs from Move class - how?
+// Pass in inputs from Move class
 void Board::makeMove(Move moveObject)
 {
+    const auto startPos = moveObject.getStartTile();
+    const auto endPos = moveObject.getEndTile();
+    ChessPieceType piece = moveObject.getPieceType();
+    
     if (isMoveValid(moveObject)) {
         m_turns++;
-        m_color = m_color && -1;
-        boardState[moveObject.m_startPosX][moveObject.m_startPosY] = none;
-        boardState[moveObject.m_endPosX][moveObject.m_endPosY] = moveObject.m_piece;
+        m_color = !m_color;
+        boardState[std::get<0>(startPos)][std::get<1>(startPos)] = none;
+        boardState[std::get<0>(endPos)][std::get<1>(endPos)] = piece;
     }
 }
 
@@ -88,7 +94,7 @@ void Board::resetBoard()
 
 int Board::getTurnCount()
 {
-    int turnCount = m_turns % 2;
+    int turnCount = m_turns / 2;
     return turnCount;
 }
 
@@ -96,19 +102,31 @@ int Board::getTurnCount()
 bool Board::isMoveValid(Move moveObject)
 {
     // if endTile isClear
-
-
+    int startPosX, startPosY, endPosX, endPosY;
+    std::tie(startPosX, startPosY) = moveObject.getStartTile();
+    std::tie(endPosX, endPosY) = moveObject.getEndTile();
+    ChessPieceType piece = moveObject.getPieceType();
 
     //if pawn
-//	if newRow < oldRow {return false}
-//	if firstMove and move > 2 return false
-//	if !firstMove and move > 1 {return false}
-//	if oldColumn != newColumn
-//		if piece_moving_diagonal
-//			if opposingPieceAtDestination {return true} captureCount++
-//			else return false
-//
-//else if rook
+    if (piece == white_pawn || piece == black_pawn) {
+        if (endPosX < startPosX) {
+            return false;
+        }
+        else if (m_turns == 1 && (endPosX > (startPosX + 2))) {
+            return false;
+        }
+        else if (m_turns > 1 && (endPosX > (startPosX + 1))) {
+            return false;
+        }
+        else if (endPosY != startPosY) {
+            //check piece at endPos, if != m_color{m_captureCount++ / return true};
+            return false;
+        }
+        else
+            return false;
+    }
+
+// if rook
 //	if (oldRow != newRow) or (oldColumn != newColumn)
 //		if oldRow != newRow and oldColumn != newColumn return false (moved diagonal)
 //		if pathBlocked return False

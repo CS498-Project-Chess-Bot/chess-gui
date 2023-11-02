@@ -6,19 +6,14 @@
 
 class Move {
 public:
+	Move(int startPosX, int startPosY, int endPosX, int endPosY, ChessPieceType piece);
+	std::tuple<int, int> getStartTile();
+	std::tuple<int, int> getEndTile();
+	ChessPieceType getPieceType();
+
+private:
 	int moveNumber;
 	int m_startPosX, m_startPosY, m_endPosX, m_endPosY;
 	ChessPieceType m_piece;
-
-	Move(int startPosX, int startPosY, int endPosX, int endPosY, ChessPieceType piece) {
-		m_startPosX = startPosX;
-		m_startPosY = startPosY;
-		m_endPosX = endPosX;
-		m_endPosY = endPosY;
-		m_piece = piece;
-	};
-	Tuple<int, int> getStartTile();
-	Tuple<int, int> getEndTile();
-	ChessPieceType getPieceType();
 };
 #endif

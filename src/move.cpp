@@ -3,19 +3,24 @@
 
 Move::Move(int startPosX, int startPosY, int endPosX, int endPosY, ChessPieceType piece)
 {
+	m_startPosX = startPosX;
+	m_startPosY = startPosY;
+	m_endPosX = endPosX;
+	m_endPosY = endPosY;
+	m_piece = piece;
 }
 
-Tuple<int, int> Move::getStartTile()
+std::tuple<int, int> Move::getStartTile()
 {
-	return Tuple<int, int>();
+	return std::make_tuple(m_startPosX, m_startPosY);
 }
 
-Tuple<int, int> Move::getEndTile()
+std::tuple<int, int> Move::getEndTile()
 {
-	return Tuple<int, int>();
+	return std::make_tuple(m_endPosX, m_endPosY);
 }
 
 ChessPieceType Move::getPieceType()
 {
-	return ChessPieceType();
+	return m_piece;
 }
