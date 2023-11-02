@@ -6,6 +6,7 @@
 #include "chess_tile_2D.hpp"
 #include "timestep.hpp"
 #include "texture_loader.hpp"
+#include "board.hpp"
 
 uint32_t App::s_height = 0;
 uint32_t App::s_width = 0;
@@ -63,6 +64,9 @@ int App::run() {
         black_rook, black_knight, black_bishop, black_queen, black_king, black_bishop, black_knight, black_rook,
     };
 
+    Board board;
+    board.makeMove(Move(0,1, 0, 2, white_pawn));
+    std::cout << board.toFEN() << std::endl;
 
     std::vector<Ref<ChessTileModel2D>> boardModel;
     for(int y = 0; y < 8; y++) {
