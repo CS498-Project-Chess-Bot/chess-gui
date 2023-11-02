@@ -63,6 +63,18 @@ Board::~Board() {
 
 }
 
+bool Board::checkTileCoordInBounds(int x, int y) const {
+    if(x < 0 || x > m_cols-1){
+        CORE_ASSERT(false, "Tile X coordinate not in board!");
+        return false;
+    }
+    if(y < 0 || y > m_rows-1) {
+        CORE_ASSERT(false, "Tile Y coordinate not in board!");
+        return false;
+    }
+    return true;
+}
+
 // Pass in inputs from Move class
 void Board::makeMove(Move moveObject)
 {

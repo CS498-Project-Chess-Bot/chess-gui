@@ -20,6 +20,8 @@ public:
 
 private:
 	bool isMoveValid(Move);
+	bool checkTileCoordInBounds(int x, int y) const;
+
 	int m_turns;
 	int m_captureCount = 0;
 	bool m_color = true; // true when white, false when black
