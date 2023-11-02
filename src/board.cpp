@@ -48,6 +48,7 @@ Board::Board(std::string FEN)
             default: break;
             }
             boardState[row][col] = piece;
+            CORE_ASSERT(false, "Piece is not yet initialized!");
         }
     }
 }
@@ -61,15 +62,16 @@ Board::~Board(){
 // Pass in inputs from Move class
 void Board::makeMove(Move moveObject)
 {
-    const auto startPos = moveObject.getStartTile();
-    const auto endPos = moveObject.getEndTile();
+    int startPosX, startPosY, endPosX, endPosY;
+    std::tie(startPosX, startPosY) = moveObject.getStartTile();
+    std::tie(endPosX, endPosY) = moveObject.getEndTile();
     ChessPieceType piece = moveObject.getPieceType();
     
     if (isMoveValid(moveObject)) {
         m_turns++;
         m_color = !m_color;
-        boardState[std::get<0>(startPos)][std::get<1>(startPos)] = none;
-        boardState[std::get<0>(endPos)][std::get<1>(endPos)] = piece;
+        boardState[startPosX][startPosY] = none;
+        boardState[endPosX][endPosY] = piece;
     }
 }
 
@@ -98,10 +100,10 @@ int Board::getTurnCount()
     return turnCount;
 }
 
-
+// TODO: make helper function isClear, figure out how to check piece at endPos
+//       implement rook, king, queen, bishop
 bool Board::isMoveValid(Move moveObject)
 {
-    // if endTile isClear
     int startPosX, startPosY, endPosX, endPosY;
     std::tie(startPosX, startPosY) = moveObject.getStartTile();
     std::tie(endPosX, endPosY) = moveObject.getEndTile();
@@ -135,11 +137,16 @@ bool Board::isMoveValid(Move moveObject)
 //		if opposingPieceAtDestination return True, captureCount++
 //	else return False
 //
-//else if knight
-//	if ((oldRow == newRow + 1 or oldRow == newRow - 1) and (oldColumn == newColumn - 2 or oldColumn == newColumn +2		)) or ((oldRow == newRow - 2 or oldRow == newRow + 2) and (oldColumn == newCOlumn - 1 or oldColumn == newColumn 		+1))
-//			if ownPieceAtDestination return False
-//			else return True
-//	else return false
+// if knight
+    if (piece == black_knight || piece == white_knight) {
+        if (((startPosX == endPosX + 1 || startPosX == endPosX - 1) && (startPosY == endPosY + 2 || startPosY == endPosY - 2)) || ((startPosX == endPosX + 2 || startPosX == endPosX - 2) && (startPosY == endPosY + 1 || startPosY == endPosY - 1))) {
+            //check piece at endPos, if ownPiece return False
+            m_captureCount++;
+            return true;
+        }
+        else
+            return false;    
+    }
 //
 //else if queen
 //else if bishop
