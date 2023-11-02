@@ -53,10 +53,14 @@ Board::Board(std::string FEN)
     }
 }
 
-Board::~Board(){
+Board::Board(){
     m_turns = 0;
     m_captureCount = 0;
     resetBoard();
+}
+
+Board::~Board() {
+
 }
 
 // Pass in inputs from Move class
@@ -70,8 +74,8 @@ void Board::makeMove(Move moveObject)
     if (isMoveValid(moveObject)) {
         m_turns++;
         m_color = !m_color;
-        boardState[startPosX][startPosY] = none;
-        boardState[endPosX][endPosY] = piece;
+        boardState[startPosY][startPosX] = none;
+        boardState[endPosY][endPosX] = piece;
     }
 }
 
@@ -94,9 +98,9 @@ void Board::resetBoard()
     }
 }
 
-int Board::getTurnCount()
+int Board::getTurnCount() const
 {
-    int turnCount = m_turns / 2;
+    int turnCount = (m_turns / 2)+1;
     return turnCount;
 }
 
@@ -109,23 +113,29 @@ bool Board::isMoveValid(Move moveObject)
     std::tie(endPosX, endPosY) = moveObject.getEndTile();
     ChessPieceType piece = moveObject.getPieceType();
 
+    if(piece == none) return false;
+    if((int)piece > 0 && !isWhiteTurn()) return false;
+    if((int)piece < 0 && isWhiteTurn()) return false;
+
     //if pawn
     if (piece == white_pawn || piece == black_pawn) {
-        if (endPosX < startPosX) {
+        if (endPosY < startPosY) {
             return false;
         }
-        else if (m_turns == 1 && (endPosX > (startPosX + 2))) {
+        else if (getTurnCount() == 1 && (endPosY > (startPosY + 2))) {
             return false;
         }
-        else if (m_turns > 1 && (endPosX > (startPosX + 1))) {
+        else if (getTurnCount() > 1 && (endPosY > (startPosY + 1))) {
             return false;
         }
-        else if (endPosY != startPosY) {
-            //check piece at endPos, if != m_color{m_captureCount++ / return true};
-            return false;
+        else if (endPosX != startPosX) {
+            if(std::abs(endPosX - startPosX) > 1)return false;
+            if((endPosY - startPosY) != 1) return false;
+            if((((int)piece) * (int)boardState[endPosY][endPosY]) > 0) return false;
+            return true;
         }
         else
-            return false;
+            return true;
     }
 
 // if rook
@@ -139,9 +149,13 @@ bool Board::isMoveValid(Move moveObject)
 //
 // if knight
     if (piece == black_knight || piece == white_knight) {
-        if (((startPosX == endPosX + 1 || startPosX == endPosX - 1) && (startPosY == endPosY + 2 || startPosY == endPosY - 2)) || ((startPosX == endPosX + 2 || startPosX == endPosX - 2) && (startPosY == endPosY + 1 || startPosY == endPosY - 1))) {
-            //check piece at endPos, if ownPiece return False
-            m_captureCount++;
+        int absX = std::abs(endPosX-startPosX);
+        int absY = std::abs(endPosY-startPosY);
+        if ((absX*absX+absY*absY) == 5) {
+            if((((int)piece) * (int)boardState[endPosY][endPosY]) > 0) return false;
+            if(boardState[endPosY][endPosX] == none){
+                m_captureCount++;
+            }
             return true;
         }
         else
@@ -158,5 +172,60 @@ bool Board::isMoveValid(Move moveObject)
 //		if ownPieceAtDestination return False
 //		else true
 //	else true
-    return false;
+    return true;
+}
+
+std::string Board::toFEN() const {
+    std::string fen = "";
+
+    for(int row = m_rows-1; row >= 0; --row) { 
+        int emptyTileCount = 0; 
+        for(int col = 0; col < m_cols; ++col) {
+            ChessPieceType piece = boardState[row][col];
+
+            char fenChar = 0;
+            switch(piece) {
+                case white_pawn: fenChar = 'P'; break;
+                case white_rook: fenChar = 'R'; break;
+                case white_bishop: fenChar = 'B'; break;
+                case white_knight: fenChar = 'N'; break;
+                case white_king: fenChar = 'K'; break;
+                case white_queen: fenChar = 'Q'; break;
+                case black_pawn: fenChar = 'p'; break;
+                case black_rook: fenChar = 'r'; break;
+                case black_bishop: fenChar = 'b'; break;
+                case black_knight: fenChar = 'n'; break;
+                case black_king: fenChar = 'k'; break;
+                case black_queen: fenChar = 'q'; break;
+                case none: emptyTileCount++; break;
+                default: CORE_ASSERT(false, "We have a serious problem!");
+            }
+            
+            if(fenChar != 0) {
+                if(emptyTileCount > 0){
+                    fen += '0' + (char)emptyTileCount; 
+                    emptyTileCount = 0;
+                }
+                
+                fen += fenChar;
+                
+            }
+            
+        }
+        if(emptyTileCount > 0){
+            fen += '0' + (char)emptyTileCount; 
+            emptyTileCount = 0;
+        }
+        fen += '/';
+    }
+    fen.pop_back();
+
+    fen += ' ';
+    fen += isWhiteTurn()? 'w' : 'b';
+    fen += " - - ";
+    fen += std::to_string(m_turns);
+    fen += " " + std::to_string(getTurnCount());
+
+    return fen;
+
 }

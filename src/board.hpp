@@ -2,18 +2,20 @@
 #define BOARD_HPP
 
 #include "core.hpp"
-#include "chess_piece_2D.hpp"
 #include "move.hpp"
 
 class Board {
 public:
 	Board(std::string FEN);
+	Board();
 	~Board();
 	void makeMove(Move moveObject);
 	bool isCheckMate();
 	bool isStalemate();
+	inline bool isWhiteTurn() const {return m_color;}
 	void resetBoard();
-	int getTurnCount();
+	int getTurnCount() const;
+	std::string toFEN() const;
 
 
 private:
@@ -24,7 +26,7 @@ private:
 	const static int m_rows = 8;
 	const static int m_cols = 8;
 	using enum ChessPieceType;
-	ChessPieceType defaultBoard[8][8] = {
+	static constexpr ChessPieceType defaultBoard[8][8] = {
 		white_rook, white_knight, white_bishop, white_queen, white_king, white_bishop, white_knight, white_rook,
 		white_pawn, white_pawn,   white_pawn,   white_pawn,  white_pawn, white_pawn,   white_pawn,   white_pawn,
 		none,       none,         none,         none,        none,       none,         none,         none,

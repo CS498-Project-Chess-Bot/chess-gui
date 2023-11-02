@@ -2,7 +2,23 @@
 #define MOVE_HPP
 
 #include "core.hpp"
-#include "chess_piece_2D.hpp"
+
+enum class ChessPieceType {
+    black_king = -6,
+    black_queen = -5,
+    black_bishop = -4,
+    black_knight = -3,
+    black_rook = -2,
+    black_pawn = -1,
+    none = 0,
+    white_pawn = 1,
+    white_rook = 2,
+    white_knight = 3,
+    white_bishop = 4,
+    white_queen = 5,
+    white_king = 6
+    
+};
 
 class Move {
 public:

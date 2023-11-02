@@ -3,6 +3,7 @@
 
 #include "core.hpp"
 #include "object.hpp"
+#include "move.hpp"
 
 const static std::vector<float> PIECE_QUAD_VERTICES = {
          0.5f,  0.5f, 0.0f,     1.0f, 1.0f, // top right
@@ -15,23 +16,6 @@ const static std::vector<uint32_t> PIECE_QUAD_INDICES = {  // note that we start
         0, 1, 3,  // first Triangle
         1, 2, 3   // second Triangle
     };
-
-enum class ChessPieceType {
-    black_king = -6,
-    black_queen = -5,
-    black_bishop = -4,
-    black_knight = -3,
-    black_rook = -2,
-    black_pawn = -1,
-    none = 0,
-    white_pawn = 1,
-    white_rook = 2,
-    white_knight = 3,
-    white_bishop = 4,
-    white_queen = 5,
-    white_king = 6
-    
-};
 
 
 class ChessPieceModel2D : public Object {
