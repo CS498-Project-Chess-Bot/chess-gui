@@ -9,7 +9,7 @@ public:
 	Board(std::string FEN);
 	Board();
 	~Board();
-	void makeMove(Move moveObject);
+	bool makeMove(Move moveObject);
 	bool isCheckMate();
 	bool isStalemate();
 	inline bool isWhiteTurn() const {return m_color;}
@@ -21,6 +21,7 @@ public:
 private:
 	bool isMoveValid(Move);
 	bool checkTileCoordInBounds(int x, int y) const;
+	bool isPathBlocked(Move);
 
 	int m_turns;
 	int m_captureCount = 0;
