@@ -84,33 +84,127 @@ bool Board::isPathBlocked(Move moveObject)
 
     if (piece == white_rook || piece == black_rook) {
         if (startPosX < endPosX) {
-            for (int i = startPosX; endPosX; i++) {
+            for (int i = startPosX + 1; i <= endPosX; i++) {
                 if (boardState[i][endPosY] != none) return false;
                 return true;
             }
         }
         else if (startPosX > endPosX) {
-            for (int i = startPosX; endPosX; i--) {
+            for (int i = startPosX + 1; i <= endPosX; i--) {
                 if (boardState[i][endPosY] != none) return false;
                 return true;
             }
         }
         else if (startPosY < endPosY) {
-            for (int i = startPosY; endPosY; i++) {
+            for (int i = startPosY + 1; i <= endPosY; i++) {
                 if (boardState[endPosX][i] != none) return false;
                 return true;
             }
         }
         else if (startPosY > endPosY) {
-            for (int i = startPosY; endPosY; i--) {
+            for (int i = startPosY + 1; i <= endPosY; i--) {
+                if (boardState[endPosX][i] != none) return false;
+                return true;
+            }
+        }
+        else return false;
+    }
+
+    if (piece == white_bishop || piece == black_bishop) {
+        if (startPosX < endPosX && startPosY < endPosY) {
+            int j = startPosY;
+            for (int i = startPosX + 1; i <= endPosX; i++) {
+                j++;
+                if (boardState[i][j] != none) return false;
+                return true;
+            }
+        }
+        else if (startPosX < endPosX && startPosY > endPosY) {
+            int j = startPosY;
+            for (int i = startPosX + 1; i <= endPosX; i++) {
+                j--;
+                if (boardState[i][j] != none) return false;
+                return true;
+            }
+        }
+        else if (startPosX > endPosX && startPosY > endPosY) {
+            int j = startPosY;
+            for (int i = startPosX - 1; i <= endPosX; i--) {
+                j--;
+                if (boardState[i][j] != none) return false;
+                return true;
+            }
+        }
+        else if (startPosX > endPosX && startPosY < endPosY) {
+            int j = startPosY;
+            for (int i = startPosX - 1; i <= endPosX; i--) {
+                j++;
+                if (boardState[i][j] != none) return false;
+                return true;
+            }
+        }
+        else return false;
+    }
+
+    if (piece == white_queen || piece == black_queen) {
+        if (startPosX < endPosX && startPosY < endPosY) {
+            int j = startPosY;
+            for (int i = startPosX + 1; i <= endPosX; i++) {
+                j++;
+                if (boardState[i][j] != none) return false;
+                return true;
+            }
+        }
+        else if (startPosX < endPosX && startPosY > endPosY) {
+            int j = startPosY;
+            for (int i = startPosX + 1; i <= endPosX; i++) {
+                j--;
+                if (boardState[i][j] != none) return false;
+                return true;
+            }
+        }
+        else if (startPosX > endPosX && startPosY > endPosY) {
+            int j = startPosY;
+            for (int i = startPosX - 1; i <= endPosX; i--) {
+                j--;
+                if (boardState[i][j] != none) return false;
+                return true;
+            }
+        }
+        else if (startPosX > endPosX && startPosY < endPosY) {
+            int j = startPosY;
+            for (int i = startPosX - 1; i <= endPosX; i--) {
+                j++;
+                if (boardState[i][j] != none) return false;
+                return true;
+            }
+        }
+        else if (startPosX < endPosX) {
+            for (int i = startPosX + 1; i <= endPosX; i++) {
+                if (boardState[i][endPosY] != none) return false;
+                return true;
+            }
+        }
+        else if (startPosX > endPosX) {
+            for (int i = startPosX + 1; i <= endPosX; i--) {
+                if (boardState[i][endPosY] != none) return false;
+                return true;
+            }
+        }
+        else if (startPosY < endPosY) {
+            for (int i = startPosY + 1; i <= endPosY; i++) {
+                if (boardState[endPosX][i] != none) return false;
+                return true;
+            }
+        }
+        else if (startPosY > endPosY) {
+            for (int i = startPosY + 1; i <= endPosY; i--) {
                 if (boardState[endPosX][i] != none) return false;
                 return true;
             }
         }
     }
 
-    if (piece == white_queen || piece == black_queen) {}
-    if (piece == white_bishop || piece == black_bishop) {}
     return false;
 }
 
@@ -158,8 +252,7 @@ int Board::getTurnCount() const
     return turnCount;
 }
 
-// TODO: make helper function isClear, figure out how to check piece at endPos
-//       implement rook, king, queen, bishop
+// TODO: implement queen
 bool Board::isMoveValid(Move moveObject)
 {
     int startPosX, startPosY, endPosX, endPosY;
@@ -196,7 +289,7 @@ bool Board::isMoveValid(Move moveObject)
     if (piece == white_rook || piece == black_rook) {
         if ((startPosX != endPosX) || (startPosY != endPosY)) {
             if ((startPosX != endPosX) && (startPosY != endPosY)) return false; // moved diagonal
-            else if isPathBlocked(moveObject) return false;
+            else if (isPathBlocked(moveObject)) return false;
             else if ((((int)piece) * (int)boardState[endPosY][endPosY]) > 0) return false; // own piece at destination
             else if ((((int)piece) * (int)boardState[endPosY][endPosY]) < 0) { // opposing piece at destination
                 m_captureCount++;
@@ -224,18 +317,24 @@ bool Board::isMoveValid(Move moveObject)
     }
 //
 //else if queen
+    if (piece == white_queen || piece == black_queen) {
+
+
+
+    }
 
 // if bishop
     if (piece == white_bishop || piece == black_bishop) {
-        if ((endPosX == startPosX) || (endPosY == startPosY)) return false;
-        else if isPathBlocked(moveObject) return false;
-        else if ((((int)piece) * (int)boardState[endPosY][endPosY]) > 0) return false; // own piece at destination
-        else if ((((int)piece) * (int)boardState[endPosY][endPosY]) < 0) { // opposing piece at destination
-            m_captureCount++;
-            return true;
+        if (std::abs(endPosX - startPosX) == std::abs(endPosY - startPosY)) {
+            if (isPathBlocked(moveObject)) return false;
+            else if ((((int)piece) * (int)boardState[endPosY][endPosY]) > 0) return false; // own piece at destination
+            else if ((((int)piece) * (int)boardState[endPosY][endPosY]) < 0) { // opposing piece at destination
+                m_captureCount++;
+                return true;
+            }
+            else return true;
         }
-        else return true;
-    }
+      }
 
 
 //else (king case)
