@@ -353,6 +353,14 @@ bool Board::isMoveValid(Move moveObject)
     return true;
 }
 
+std::vector<ChessPieceType> Board::getBoardState() {
+    std::vector<ChessPieceType> ret;
+    for(int i=0; i < 8; i++)
+        for(int j = 0; j < 8; j++)
+            ret.push_back(boardState[i][j]);
+    return ret;
+}
+
 std::string Board::toFEN() const {
     std::string fen = "";
 

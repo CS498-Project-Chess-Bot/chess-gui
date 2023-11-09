@@ -15,6 +15,7 @@ public:
 	inline bool isWhiteTurn() const {return m_color;}
 	void resetBoard();
 	int getTurnCount() const;
+	std::vector<ChessPieceType> getBoardState();
 	std::string toFEN() const;
 
 
