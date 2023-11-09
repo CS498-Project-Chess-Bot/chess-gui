@@ -219,8 +219,8 @@ bool Board::makeMove(Move moveObject)
     if (isMoveValid(moveObject)) {
         m_turns++;
         m_color = !m_color;
-        boardState[startPosY][startPosX] = none;
-        boardState[endPosY][endPosX] = piece;
+        boardState[startPosX][startPosY] = none;
+        boardState[endPosX][endPosY] = piece;
         return true;
     }
 
@@ -252,7 +252,6 @@ int Board::getTurnCount() const
     return turnCount;
 }
 
-// TODO: implement queen
 bool Board::isMoveValid(Move moveObject)
 {
     int startPosX, startPosY, endPosX, endPosY;
@@ -318,9 +317,17 @@ bool Board::isMoveValid(Move moveObject)
 //
 //else if queen
     if (piece == white_queen || piece == black_queen) {
-
-
-
+        if (endPosX == startPosX || endPosY == startPosY || std::abs(endPosX - startPosX) == std::abs(endPosY - startPosY)) {
+            if (isPathBlocked(moveObject)) return false;
+            else if ((((int)piece) * (int)boardState[endPosY][endPosY]) > 0) return false; // own piece at destination
+            else if ((((int)piece) * (int)boardState[endPosY][endPosY]) < 0) { // opposing piece at destination
+                m_captureCount++;
+                return true;
+            }
+            else return true;
+        }
+        else
+            return false;
     }
 
 // if bishop
@@ -334,12 +341,14 @@ bool Board::isMoveValid(Move moveObject)
             }
             else return true;
         }
+        else
+            return false;
       }
 
 
 //else (king case)
     if (piece == white_king || piece == black_king) {
-        if (((endPosX == startPosX + 1) && (endPosY == startPosY - 1)) || (endPosX == startPosX + 1) || ((endPosX == startPosX + 1) && (endPosY == startPosY + 1)) ||(endPosX == startPosX - 1) || (endPosY == startPosY - 1) || (endPosY == startPosY + 1) || ((endPosX == startPosX - 1) && (endPosY == startPosY - 1)) || ((endPosX == startPosX - 1) && (endPosY == startPosY + 1))) {
+        if(std::abs(endPosX - startPosX) <= 1 && std::abs(endPosY - startPosY) <= 1){
             if ((((int)piece) * (int)boardState[endPosY][endPosY]) > 0) return false; // own piece at destination
             else if ((((int)piece) * (int)boardState[endPosY][endPosY]) < 0) { // opposing piece at destination
                 m_captureCount++;
