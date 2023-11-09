@@ -105,6 +105,8 @@ int App::run() {
                         //std::cout << "Had a first tile" << std::endl;
                         if(board.makeMove(Move(firstTile % 8, firstTile / 8, count % 8, count / 8, boardState.at(firstTile)))){
                             firstTileSelected = false;
+                            boardState = board.getBoardState();
+                            boardModel.at(count)->getChildren().clear();
                             boardModel.at(count)->addChild(boardModel.at(firstTile)->getChildren().at(0));
                             boardModel.at(firstTile)->getChildren().clear();
                             //std::cout << "successful move" << std::endl;
