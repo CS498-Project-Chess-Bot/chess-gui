@@ -23,6 +23,9 @@ private:
 	bool isMoveValid(Move);
 	bool checkTileCoordInBounds(int x, int y) const;
 	bool isPathBlocked(Move);
+	bool isOwnPiece(Move);
+	bool isOpposingPiece(Move);
+
 
 	int m_turns;
 	int m_captureCount = 0;
