@@ -53,20 +53,9 @@ App::App(int width, int height, const std::string title)
 
 int App::run() {
     using enum ChessPieceType;
-    std::vector<ChessPieceType> boardState = {
-        white_rook, white_knight, white_bishop, white_queen, white_king, white_bishop, white_knight, white_rook,
-        white_pawn, white_pawn,   white_pawn,   white_pawn,  white_pawn, white_pawn,   white_pawn,   white_pawn,
-        none,       none,         none,         none,        none,       none,         none,         none,
-        none,       none,         none,         none,        none,       none,         none,         none,
-        none,       none,         none,         none,        none,       none,         none,         none,
-        none,       none,         none,         none,        none,       none,         none,         none,
-        black_pawn, black_pawn,   black_pawn,   black_pawn,  black_pawn, black_pawn,   black_pawn,   black_pawn,
-        black_rook, black_knight, black_bishop, black_queen, black_king, black_bishop, black_knight, black_rook,
-    };
-
+    std::vector<ChessPieceType> boardState;
     Board board;
-    board.makeMove(Move(0,1, 0, 2, white_pawn));
-    std::cout << board.toFEN() << std::endl;
+    boardState = board.getBoardState();
 
     std::vector<Ref<ChessTileModel2D>> boardModel;
     for(int y = 0; y < 8; y++) {
@@ -86,6 +75,9 @@ int App::run() {
 
     Camera camera({3.5f, 3.5f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
 
+    bool firstTileSelected = false;
+    int firstTile = 0;
+
     while (!glfwWindowShouldClose(window))
     {
         // input
@@ -96,6 +88,7 @@ int App::run() {
             glm::vec3 mouseWorld = mousePosToWorld(m_mousePressed_x, m_mousePressed_y, camera, projection, s_width, s_height);
             glm::vec3 raydir = camera.pos() - mouseWorld;
 
+            int count = 0;
             for(auto& tile : boardModel) {
                 bool hits = tile->checkRayIntersectsTile(camera.pos(), glm::normalize(raydir));
                 if(hits) {
@@ -103,9 +96,33 @@ int App::run() {
                         tile->setHighlight(false);
                     }
                     tile->setHighlight(true);
+
+                    if(!firstTileSelected){
+                        firstTile = count;
+                        firstTileSelected = true;
+                        //std::cout << firstTile << std::endl;
+                    }else{
+                        //std::cout << "Had a first tile" << std::endl;
+                        if(board.makeMove(Move(firstTile % 8, firstTile / 8, count % 8, count / 8, boardState.at(firstTile)))){
+                            firstTileSelected = false;
+                            boardState = board.getBoardState();
+                            boardModel.at(count)->getChildren().clear();
+                            boardModel.at(count)->addChild(boardModel.at(firstTile)->getChildren().at(0));
+                            boardModel.at(firstTile)->getChildren().clear();
+                            //std::cout << "successful move" << std::endl;
+                            //std::cout << firstTile << std::endl;
+                            //std::cout << count << std::endl;
+                        }
+                        else{
+                            firstTile = count;
+                            //std::cout << "new first tile" << std::endl;
+                            //std::cout << firstTile << std::endl;
+                        }
+                    }   
+
                     break;
-                     
                 }
+                count++;
             }
 
         }
