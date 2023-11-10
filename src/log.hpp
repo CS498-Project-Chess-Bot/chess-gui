@@ -3,7 +3,7 @@
 
 #include "core.hpp"
 
-#define CORE_ASSERT(x, ...) { if(!(x)) { std::cerr << "ERROR: ASSERTION FAILED - " << __VA_ARGS__ << std::endl; }}
+#define CORE_ASSERT(x, ...) { if(!(x)) { std::cerr << "ERROR: ASSERTION FAILED - " << __VA_ARGS__ << std::endl; exit(-1); }}
 
 
 #endif

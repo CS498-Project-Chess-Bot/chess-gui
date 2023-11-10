@@ -7,8 +7,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main(void)
 {
-    // glfw window creation
-    // --------------------
+
     App app(SCR_WIDTH, SCR_HEIGHT, "chess-gui");
 
     int result = app.run();

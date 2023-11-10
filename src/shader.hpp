@@ -2,6 +2,8 @@
 #define SHADER_HPP
 
 #include "core.hpp"
+#include "texture.hpp"
+#include <unordered_map>
 
 class Shader {
 public:
@@ -11,11 +13,24 @@ public:
 
     void bind() const;
 
-private:
-    const std::string readShaderFileAsStr(const std::string& path);
+    void setInt(const std::string& name, int32_t value);
+
+    void setFloat(const std::string& name, float value);
+    void setFloat4(const std::string& name, const glm::vec4& values);
+
+    void setMat4(const std::string& name, const glm::mat4& matrix);
+
+    void setTexture(const std::string& name, Texture& texture);
+
 
 private:
+    const std::string readShaderFileAsStr(const std::string& path);
+    uint32_t getUniformLocation(const std::string& name);
+
+private:
+    std::unordered_map<std::string, uint32_t> m_uniformMap;
     uint32_t programID;
+
 
 };
 

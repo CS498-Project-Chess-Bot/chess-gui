@@ -41,27 +41,27 @@ void VertexArray::unbind() const {
     glBindVertexArray(0);
 }
 
-void VertexArray::addVertexBuffer(const VertexBuffer& vbo) {
+void VertexArray::addVertexBuffer(const Ref<VertexBuffer>& vbo) {
     bind();
-    vbo.bind();
+    vbo->bind();
 
-    CORE_ASSERT(vbo.getLayout().getElements().size(), "Vertex Buffer has no layout!");
+    CORE_ASSERT(vbo->getLayout().getElements().size(), "Vertex Buffer has no layout!");
 
     uint32_t index = 0;
-    for(const auto& element : vbo.getLayout()) {
+    for(const auto& element : vbo->getLayout()) {
         glEnableVertexAttribArray(index);
         glVertexAttribPointer(index, element.getComponentCount(),
             shaderDataTypeToOpenGLBaseType(element.type), element.normalized ? GL_TRUE : GL_FALSE,
-            vbo.getLayout().getStride(), reinterpret_cast<void*>(element.offset));
+            vbo->getLayout().getStride(), reinterpret_cast<void*>(element.offset));
         index++;
     }
 
     m_vertexBuffers.push_back(vbo);
 }
 
-void VertexArray::setIndexBuffer(const IndexBuffer& ibo) {
+void VertexArray::setIndexBuffer(const Ref<IndexBuffer>& ibo) {
     bind();
-    ibo.bind();
+    ibo->bind();
     m_indexBuffer = ibo;
 }
 
