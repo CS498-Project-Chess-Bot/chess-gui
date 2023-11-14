@@ -73,50 +73,25 @@ int App::run() {
             bool hits = chessBoard->getHitTile(camera, raydir, &tileX, &tileY);
             if(hits) {
                 if(!firstTileSelected) {
+                    chessBoard->clearHightlighting();
                     firstTileSelected = true;
                     firstTileX = tileX;
                     firstTileY = tileY;
                 }
                 else {
+                    chessBoard->setTileHightlight(firstTileX, firstTileY, false);
                     if(chessBoard->tryMove(Move(firstTileX, firstTileY, tileX, tileY, chessBoard->getGameBoard().getBoardState().at(firstTileY*8 + firstTileX)))) {
                         firstTileSelected = false;
                     }
                     else {
                         firstTileX = tileX;
                         firstTileY = tileY;
+                        
                     }
+                    
                 }
-                
+                chessBoard->setTileHightlight(tileX, tileY, true);
             }
-            // int count = 0;
-            // for(auto& tile : boardModel) {
-            //     bool hits = tile->checkRayIntersectsTile(camera.pos(), glm::normalize(raydir));
-            //     if(hits) {
-            //         for(auto& tile : boardModel) {
-            //             tile->setHighlight(false);
-            //         }
-            //         tile->setHighlight(true);
-
-            //         if(!firstTileSelected){
-            //             firstTile = count;
-            //             firstTileSelected = true;
-            //         }else{
-            //             if(board.makeMove(Move(firstTile % 8, firstTile / 8, count % 8, count / 8, boardState.at(firstTile)))){
-            //                 firstTileSelected = false;
-            //                 boardState = board.getBoardState();
-            //                 boardModel.at(count)->getChildren().clear();
-            //                 boardModel.at(count)->addChild(boardModel.at(firstTile)->getChildren().at(0));
-            //                 boardModel.at(firstTile)->getChildren().clear();
-            //             }
-            //             else{
-            //                 firstTile = count;
-            //             }
-            //         }   
-
-            //         break;
-            //     }
-            //     count++;
-            // }
 
         }
 
@@ -130,10 +105,8 @@ int App::run() {
 
         RenderCommand::beginScene(camera);
         RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
-        //std::cout << "submitting board\n";
         Ref<Object> boardObject = std::dynamic_pointer_cast<Object>(chessBoard);
         RenderCommand::submit(boardObject);
-        //std::cout << "Completed submit\n";
         RenderCommand::endScene(s_width, s_height);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

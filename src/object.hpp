@@ -45,7 +45,6 @@ public:
     inline virtual std::vector<Ref<Object>>& getChildren() {return m_children; }
     inline void passTransformToChildren()
     { 
-        //std::cout << "passing...\n";
         for(auto& child : m_children) {
             child->transform().recalculateTransform();
             child->transform().transform() *= m_transform.transform();
