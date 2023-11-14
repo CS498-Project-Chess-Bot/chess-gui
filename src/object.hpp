@@ -42,9 +42,10 @@ public:
     inline std::shared_ptr<Texture>& texture() { return m_texture; }
 
     inline void addChild(const Ref<Object>& child) { m_children.push_back(child); }
-    inline std::vector<Ref<Object>>& getChildren() {return m_children; }
+    inline virtual std::vector<Ref<Object>>& getChildren() {return m_children; }
     inline void passTransformToChildren()
     { 
+        //std::cout << "passing...\n";
         for(auto& child : m_children) {
             child->transform().recalculateTransform();
             child->transform().transform() *= m_transform.transform();

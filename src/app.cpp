@@ -2,8 +2,7 @@
 #include "app.hpp"
 #include "renderer.hpp"
 #include "camera.hpp"
-#include "chess_piece_2D.hpp"
-#include "chess_tile_2D.hpp"
+#include "chess_board_2D.hpp"
 #include "timestep.hpp"
 #include "texture_loader.hpp"
 #include "board.hpp"
@@ -52,31 +51,13 @@ App::App(int width, int height, const std::string title)
 }
 
 int App::run() {
-    using enum ChessPieceType;
-    std::vector<ChessPieceType> boardState;
-    Board board;
-    boardState = board.getBoardState();
 
-    std::vector<Ref<ChessTileModel2D>> boardModel;
-    for(int y = 0; y < 8; y++) {
-        for(int x = 0; x < 8; x++) {
-            bool isWhite = ((y*8)+x+(y%2))%2;
-            Ref<ChessTileModel2D> tile = createRef<ChessTileModel2D>(isWhite);
-            tile->transform().changePos({x*1.0f, y*1.0f, -8.0f});
-
-            int idx = 8*y + x;
-            if(boardState[idx] != none){
-                Ref<ChessPieceModel2D> piece = createRef<ChessPieceModel2D>(boardState[idx]);
-                tile->addChild(piece);
-            }
-            boardModel.push_back(tile);
-        }
-    }
+    Ref<ChessBoardModel2D> chessBoard = createRef<ChessBoardModel2D>(false);
 
     Camera camera({3.5f, 3.5f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
 
     bool firstTileSelected = false;
-    int firstTile = 0;
+    int firstTileX = -1, firstTileY = -1;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -88,35 +69,54 @@ int App::run() {
             glm::vec3 mouseWorld = mousePosToWorld(m_mousePressed_x, m_mousePressed_y, camera, projection, s_width, s_height);
             glm::vec3 raydir = camera.pos() - mouseWorld;
 
-            int count = 0;
-            for(auto& tile : boardModel) {
-                bool hits = tile->checkRayIntersectsTile(camera.pos(), glm::normalize(raydir));
-                if(hits) {
-                    for(auto& tile : boardModel) {
-                        tile->setHighlight(false);
-                    }
-                    tile->setHighlight(true);
-
-                    if(!firstTileSelected){
-                        firstTile = count;
-                        firstTileSelected = true;
-                    }else{
-                        if(board.makeMove(Move(firstTile % 8, firstTile / 8, count % 8, count / 8, boardState.at(firstTile)))){
-                            firstTileSelected = false;
-                            boardState = board.getBoardState();
-                            boardModel.at(count)->getChildren().clear();
-                            boardModel.at(count)->addChild(boardModel.at(firstTile)->getChildren().at(0));
-                            boardModel.at(firstTile)->getChildren().clear();
-                        }
-                        else{
-                            firstTile = count;
-                        }
-                    }   
-
-                    break;
+            int tileX, tileY;
+            bool hits = chessBoard->getHitTile(camera, raydir, &tileX, &tileY);
+            if(hits) {
+                if(!firstTileSelected) {
+                    firstTileSelected = true;
+                    firstTileX = tileX;
+                    firstTileY = tileY;
                 }
-                count++;
+                else {
+                    if(chessBoard->tryMove(Move(firstTileX, firstTileY, tileX, tileY, chessBoard->getGameBoard().getBoardState().at(firstTileY*8 + firstTileX)))) {
+                        firstTileSelected = false;
+                    }
+                    else {
+                        firstTileX = tileX;
+                        firstTileY = tileY;
+                    }
+                }
+                
             }
+            // int count = 0;
+            // for(auto& tile : boardModel) {
+            //     bool hits = tile->checkRayIntersectsTile(camera.pos(), glm::normalize(raydir));
+            //     if(hits) {
+            //         for(auto& tile : boardModel) {
+            //             tile->setHighlight(false);
+            //         }
+            //         tile->setHighlight(true);
+
+            //         if(!firstTileSelected){
+            //             firstTile = count;
+            //             firstTileSelected = true;
+            //         }else{
+            //             if(board.makeMove(Move(firstTile % 8, firstTile / 8, count % 8, count / 8, boardState.at(firstTile)))){
+            //                 firstTileSelected = false;
+            //                 boardState = board.getBoardState();
+            //                 boardModel.at(count)->getChildren().clear();
+            //                 boardModel.at(count)->addChild(boardModel.at(firstTile)->getChildren().at(0));
+            //                 boardModel.at(firstTile)->getChildren().clear();
+            //             }
+            //             else{
+            //                 firstTile = count;
+            //             }
+            //         }   
+
+            //         break;
+            //     }
+            //     count++;
+            // }
 
         }
 
@@ -130,10 +130,10 @@ int App::run() {
 
         RenderCommand::beginScene(camera);
         RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
-        for(auto& tile : boardModel) {
-            Ref<Object> submittableTile = tile;
-            RenderCommand::submit(submittableTile);
-        }
+        //std::cout << "submitting board\n";
+        Ref<Object> boardObject = std::dynamic_pointer_cast<Object>(chessBoard);
+        RenderCommand::submit(boardObject);
+        //std::cout << "Completed submit\n";
         RenderCommand::endScene(s_width, s_height);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

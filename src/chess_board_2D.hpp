@@ -4,20 +4,20 @@
 #include "chess_tile_2D.hpp"
 #include "chess_piece_2D.hpp"
 #include "board.hpp"
+#include "camera.hpp"
 
-class ChessBoard2D : public Object {
+class ChessBoardModel2D : public Object {
 public:
-    ChessBoard2D(bool isPlayerWhite = true);
-    ~ChessBoard2D();
+    ChessBoardModel2D(bool isPlayerWhite = true);
+    ~ChessBoardModel2D();
 
-    void setExtraUniforms() override;
-
-    inline &Board getGameBoard() { return gameBoard; }
+    inline Board& getGameBoard() { return m_gameBoard; }
     bool tryMove(Move m);
+    bool getHitTile(Camera& cam, glm::vec3 rayDir, int* x, int* y);
 
 private:
-    Board gameBoard;
-    bool isPlayerWhite;
+    Board m_gameBoard;
+    bool m_isPlayerWhite;
 
 };
 

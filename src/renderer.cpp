@@ -36,9 +36,14 @@ void Renderer::submit(const VertexArray& vao, const Shader& shader, const Textur
 }
 
 void Renderer::submit(Ref<Object>& obj) {
+    //std::cout << "Submitting " << obj << std::endl;
+    CORE_ASSERT(obj != nullptr, "Trying to render a null object!");
     obj->passTransformToChildren();
+    //std::cout << "passed to children " << obj << std::endl;
     for(auto& child : obj->getChildren()) {
-        m_objects.push_back(child);
+        //std::cout << child << std::endl;
+        if(child)
+            submit(child);
     }
     m_objects.push_back(obj);
     
