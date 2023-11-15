@@ -39,11 +39,13 @@ public:
         std::array<char, 1048576> buffer;
         std::string result;
 
+
         FILE *pipe = popen(command.c_str(), "r");
         if (pipe == nullptr) {
             throw std::runtime_error("popen() failed!");
         }
         try {
+            std::cout << "reading bytes\n";
             std::size_t bytesread;
             while ((bytesread = fread(buffer.data(), sizeof(buffer.at(0)), sizeof(buffer), pipe)) != 0) {
                 result += std::string(buffer.data(), bytesread);
@@ -52,6 +54,7 @@ public:
             pclose(pipe);
             throw;
         }
+        std::cout << "command finished!" << std::endl;
         exitcode = WEXITSTATUS(pclose(pipe));
         return CommandResult{result, exitcode};
     }

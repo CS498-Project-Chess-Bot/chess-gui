@@ -61,7 +61,7 @@ int App::run() {
     int firstTileX = -1, firstTileY = -1;
 
     std::future<CommandResult> engineResult;
-    engineResult = std::async(Command::exec, "sleep 3");
+    engineResult = std::async(Command::exec, "python ./chess-engine/Game.py");
     while (!glfwWindowShouldClose(window))
     {
         
@@ -70,7 +70,7 @@ int App::run() {
         if(engineStatus == std::future_status::ready) {
             CommandResult r = engineResult.get();
             std::cout << r << std::endl;
-            engineResult = std::async(Command::exec, "sleep 3");
+            engineResult = std::async(Command::exec, "python ./chess-engine/Game.py");
         }
 
 

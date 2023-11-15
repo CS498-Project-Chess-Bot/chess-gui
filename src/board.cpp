@@ -100,7 +100,7 @@ bool Board::isClear(Move moveObject)
     int currentCol = startPosX + addToCol;
     int currentRow = startPosY + addToRow;
 
-    std::cout << startPosX << ", " << startPosY << " " << currentCol << ", " << currentRow << " " << endPosX << ", " << endPosY << std::endl;
+    //std::cout << startPosX << ", " << startPosY << " " << currentCol << ", " << currentRow << " " << endPosX << ", " << endPosY << std::endl;
 
     while((endPosX != currentCol) || (endPosY != currentRow)){
         if(boardState[currentRow][currentCol] != none) return false;
