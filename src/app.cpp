@@ -6,6 +6,7 @@
 #include "timestep.hpp"
 #include "texture_loader.hpp"
 #include "board.hpp"
+#include "command.hpp"
 
 uint32_t App::s_height = 0;
 uint32_t App::s_width = 0;
@@ -59,8 +60,20 @@ int App::run() {
     bool firstTileSelected = false;
     int firstTileX = -1, firstTileY = -1;
 
+    std::future<CommandResult> engineResult;
+    engineResult = std::async(Command::exec, "sleep 3");
     while (!glfwWindowShouldClose(window))
     {
+        
+
+        std::future_status engineStatus = engineResult.wait_for(std::chrono::seconds(0));
+        if(engineStatus == std::future_status::ready) {
+            CommandResult r = engineResult.get();
+            std::cout << r << std::endl;
+            engineResult = std::async(Command::exec, "sleep 3");
+        }
+
+
         // input
         // -----
         processInput();
