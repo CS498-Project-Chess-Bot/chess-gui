@@ -22,7 +22,7 @@ public:
 private:
 	bool isMoveValid(Move);
 	bool checkTileCoordInBounds(int x, int y) const;
-	bool isPathBlocked(Move);
+	bool isClear(Move);
 	bool isOwnPiece(Move);
 	bool isOpposingPiece(Move);
 
