@@ -142,9 +142,6 @@ bool Board::makeMove(Move moveObject)
     std::tie(endPosX, endPosY) = moveObject.getEndTile();
     ChessPieceType piece = moveObject.getPieceType();
 
-    std::cout << isMoveValid(moveObject) << std::endl;
-    std::cout << isClear(moveObject) << std::endl;
-
     if (isMoveValid(moveObject) && isClear(moveObject)) {
         m_turns++;
         m_color = !m_color;
