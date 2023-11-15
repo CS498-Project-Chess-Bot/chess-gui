@@ -52,7 +52,7 @@ App::App(int width, int height, const std::string title)
 
 int App::run() {
 
-    Ref<ChessBoardModel2D> chessBoard = createRef<ChessBoardModel2D>(false);
+    Ref<ChessBoardModel2D> chessBoard = createRef<ChessBoardModel2D>(true);
 
     Camera camera({3.5f, 3.5f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
 
@@ -86,7 +86,6 @@ int App::run() {
                     else {
                         firstTileX = tileX;
                         firstTileY = tileY;
-                        
                     }
                     
                 }
