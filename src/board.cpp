@@ -209,6 +209,8 @@ bool Board::isMoveValid(Move moveObject)
             if (distanceY == 2){
                 if(team && startPosY == 1) return true;
                 else if(!team && startPosY == 6) return true;
+                //save coordinates of where the pawn is for a potential enpessant
+                //turn on boolean value to erase coords in the next turn
             }
             if(distanceY == 1) 
                 return true;
@@ -221,6 +223,9 @@ bool Board::isMoveValid(Move moveObject)
     // if rook
     if (piece == white_rook || piece == black_rook) {
         if ((startPosX == endPosX) || (startPosY == endPosY)) { //if on same rank or file
+            //if the coords are in the right spot in relation to en pessant, 
+            //adjust boardstate respectively
+            //return unique en pessant value for app to facilitate movement
             if (isTeamPiece) 
                 return false;      //and not blocked
             else
@@ -262,6 +267,11 @@ bool Board::isMoveValid(Move moveObject)
 
     //else (king case)
     if (piece == white_king || piece == black_king) {
+        //if castling
+            //if king hasn't moved and rook in the corner haven't moved
+            //if king can pass to new square without seeing check
+            //if castling is initiated
+            //move king and rook -> return different value to trigger piece movement in app
         if(distanceX <= 1 && distanceY <= 1) {
             if (isTeamPiece)
                 return false; // own piece at destination
