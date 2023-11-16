@@ -42,16 +42,46 @@ ChessBoardModel2D::~ChessBoardModel2D() {
 }
 
 bool ChessBoardModel2D::tryMove(Move m) {
-    bool valid = m_gameBoard.makeMove(m);
-    if(valid) {
-        int startIdx = std::get<1>(m.getStartTile()) * CHESS_ROWS + std::get<0>(m.getStartTile());
-        int endIdx = std::get<1>(m.getEndTile()) * CHESS_ROWS + std::get<0>(m.getEndTile());
+    MoveResult res = m_gameBoard.makeMove(m);
+    if(res != MoveResult::Invalid) {
+        int startX = std::get<0>(m.getStartTile());
+        int startY = std::get<1>(m.getStartTile());
+        int endX = std::get<0>(m.getEndTile());
+        int endY = std::get<1>(m.getEndTile());
+        ChessPieceType piece = m.getPieceType();
+
+        int startIdx = startY * CHESS_ROWS + startX;
+        int endIdx = endY * CHESS_ROWS + endX;
 
         m_children[endIdx]->getChildren().clear();
         m_children[endIdx]->addChild(m_children[startIdx]->getChildren().front());
         m_children[startIdx]->getChildren().clear();
+
+        if(res == MoveResult::Castle) {
+            if(piece == ChessPieceType::white_king && startX > endX) {
+                int rookLoc = 0*CHESS_ROWS + 0;
+                m_children[endIdx+1]->addChild(m_children[rookLoc]->getChildren().front());
+                m_children[rookLoc]->getChildren().clear();
+            }
+            else if(piece == ChessPieceType::white_king && startX < endX) {
+                int rookLoc = 0*CHESS_ROWS + CHESS_COLS-1;
+                m_children[endIdx-1]->addChild(m_children[rookLoc]->getChildren().front());
+                m_children[rookLoc]->getChildren().clear();
+            }
+            else if(piece == ChessPieceType::black_king && startX > endX) {
+                int rookLoc = (CHESS_ROWS-1)*CHESS_ROWS + 0;
+                m_children[endIdx+1]->addChild(m_children[rookLoc]->getChildren().front());
+                m_children[rookLoc]->getChildren().clear();
+            }
+            else if(piece == ChessPieceType::black_king && startX < endX) {
+                int rookLoc = (CHESS_ROWS-1)*CHESS_ROWS + CHESS_COLS-1;
+                m_children[endIdx-1]->addChild(m_children[rookLoc]->getChildren().front());
+                m_children[rookLoc]->getChildren().clear();
+            }
+        }
+
     }
-    return valid;
+    return res != MoveResult::Invalid;
 }
 
 bool ChessBoardModel2D::getHitTile(Camera& cam, glm::vec3 rayDir, int* x, int* y) {

@@ -4,12 +4,20 @@
 #include "core.hpp"
 #include "move.hpp"
 
+enum MoveResult {
+	Castle,
+	EnPassant,
+	Standard,
+	Promotion,
+	Invalid
+};
+
 class Board {
 public:
 	Board(std::string FEN);
 	Board();
 	~Board();
-	bool makeMove(Move moveObject);
+	MoveResult makeMove(Move moveObject);
 	bool isCheckMate();
 	bool isStalemate();
 	inline bool isWhiteTurn() const {return m_color;}
@@ -20,7 +28,7 @@ public:
 
 
 private:
-	bool isMoveValid(Move);
+	MoveResult isMoveValid(Move);
 	bool checkTileCoordInBounds(int x, int y) const;
 	bool isClear(Move);
 	bool isOwnPiece(Move);
@@ -44,5 +52,10 @@ private:
 		{black_rook, black_knight, black_bishop, black_queen, black_king, black_bishop, black_knight, black_rook}
 	};
 	ChessPieceType boardState[8][8] = {};
+
+	bool whiteCanCastleQueen = true;
+	bool whiteCanCastleKing = true;
+	bool blackCanCastleQueen = true;
+	bool blackCanCastleKing = true;
 };
 #endif

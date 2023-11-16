@@ -60,7 +60,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 $(BUILD_DIR)/glad.o : $(GLAD_SRC)/glad.c
 	g++ -c $(CFLAGS) -o $@ $< $(INCLUDE_PARAMS)
 
-$(EXEC_FILE): $(OBJ_FILES:%=$(BUILD_DIR)/%) $(BUILD_DIR)/glad.o 
+$(EXEC_FILE): $(OBJ_FILES:%=$(BUILD_DIR)/%) $(BUILD_DIR)/glad.o
 	g++ $(CFLAGS) $(LFLAGS) $(INCLUDE_PARAMS) $(LIB_DIRS_PARAMS) -o $(BUILD_DIR)/$(EXEC_FILE) $^ $(LIBS_PARAMS) 
 
 run:
