@@ -35,12 +35,12 @@ private:
 	bool isClear(Move);
 	bool isOwnPiece(Move);
 	bool isOpposingPiece(Move);
-	bool findKnight(Move);
-	bool findRook(Move, bool);
-	bool findBishop(Move, bool);
-	bool findPawn(Move);
-	bool findQueen(Move);
-	bool findKing(Move);
+	bool findKnight(Move, int, int, int);
+	bool findRook(Move, int, int, bool, int);
+	bool findBishop(Move, int, int, bool, int);
+	bool findPawn(Move, int, int, int);
+	bool findQueen(Move, int, int, int);
+	bool findKing(Move, int, int, int);
 
 
 	int m_turns;
