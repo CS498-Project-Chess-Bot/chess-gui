@@ -54,8 +54,6 @@ Board::Board(std::string FEN)
 }
 
 Board::Board(){
-    m_turns = 0;
-    m_captureCount = 0;
     resetBoard();
 }
 
@@ -116,8 +114,7 @@ bool Board::isOwnPiece(Move moveObject)
     std::tie(startPosX, startPosY) = moveObject.getStartTile();
     std::tie(endPosX, endPosY) = moveObject.getEndTile();
     ChessPieceType piece = moveObject.getPieceType();
-    if (((((int)piece) * (int)boardState[endPosY][endPosX]) > 0))
-        return true;
+    if (((((int)piece) * (int)boardState[endPosY][endPosX]) > 0)) return true;
     else return false;
 }
 
@@ -180,9 +177,201 @@ MoveResult Board::makeMove(Move moveObject)
     return MoveResult::Invalid;
 }
 
-
-bool Board::isCheckMate()
+bool Board::findKnight(Move moveObject)
 {
+    int startPosX, startPosY;
+    std::tie(startPosX, startPosY) = moveObject.getStartTile();
+    ChessPieceType piece = moveObject.getPieceType();
+    ChessPieceType searchPiece = none;
+    if ((int)piece > 0) searchPiece = black_knight;
+    else searchPiece = white_knight;
+
+    int x[] = { 2, 2, -2, -2,
+                1, 1, -1, -1 };
+    int y[] = { 1, -1, 1, -1,
+                2, -2, 2, -2 };
+    for (int k = 0; k < 8; k++) {
+        int m = startPosY + x[k];
+        int n = startPosX + y[k];
+        if (checkTileCoordInBounds(m, n) && boardState[m][n] == searchPiece) return true;
+    }
+    return false;
+}
+
+bool Board::findRook(Move moveObject, bool isQueen)
+{
+    int startPosX, startPosY;
+    std::tie(startPosX, startPosY) = moveObject.getStartTile();
+    ChessPieceType piece = moveObject.getPieceType();
+    ChessPieceType searchPiece = none;
+    int k = 0;
+    if ((int)piece > 0) {
+        if (isQueen) searchPiece = black_queen;
+        else searchPiece = black_rook;
+    }
+    else {
+        if (isQueen) searchPiece = white_queen;
+        else searchPiece = white_rook;
+    }
+
+    while (checkTileCoordInBounds(startPosY + ++k, startPosX)) {
+        if (boardState[startPosY + k][startPosX] == searchPiece) return true;
+        if (boardState[startPosY + k][startPosX] != none) break;
+    }
+
+    k = 0;
+    while (checkTileCoordInBounds(startPosY + --k, startPosX)) {
+        if (boardState[startPosY + k][startPosX] == searchPiece) return true;
+        if (boardState[startPosY + k][startPosX] != none) break;
+    }
+
+    k = 0;
+    while (checkTileCoordInBounds(startPosY, startPosX + ++k)) {
+        if (boardState[startPosY][startPosX + k] == searchPiece) return true;
+        if (boardState[startPosY][startPosX + k] != none) break;
+    }
+
+    k = 0;
+    while (checkTileCoordInBounds(startPosY, startPosX + --k)) {
+        if (boardState[startPosY][startPosX + k] == searchPiece) return true;
+        if (boardState[startPosY][startPosX + k] != none) break;
+    }
+    return false;
+}
+
+bool Board::findBishop(Move moveObject, bool isQueen)
+{
+    int startPosX, startPosY;
+    std::tie(startPosX, startPosY) = moveObject.getStartTile();
+    ChessPieceType piece = moveObject.getPieceType();
+    ChessPieceType searchPiece = none;
+    int k = 0;
+    if ((int)piece > 0) {
+        if (isQueen) searchPiece = black_queen;
+        else searchPiece = black_bishop;
+    }
+    else {
+        if (isQueen) searchPiece = white_queen;
+        else searchPiece = white_bishop;
+    }
+
+    while (checkTileCoordInBounds(startPosY + k, startPosX + k)) {
+        if (boardState[startPosY + k][startPosX + k] == searchPiece) return true;
+        if (boardState[startPosY + k][startPosX + k] != none) break;
+        k++;
+    }
+
+    k = 0;
+    while (checkTileCoordInBounds(startPosY + k, startPosX - k)) {
+        if (boardState[startPosY + k][startPosX - k] == searchPiece) return true;
+        if (boardState[startPosY + k][startPosX - k] != none) break;
+        k++;
+    }
+
+    k = 0;
+    while (checkTileCoordInBounds(startPosY - k, startPosX + k)) {
+        if (boardState[startPosY - k][startPosX + k] == searchPiece) return true;
+        if (boardState[startPosY - k][startPosX + k] != none) break;
+        k++;
+    }
+
+    k = 0;
+    while (checkTileCoordInBounds(startPosY - k, startPosX - k)) {
+        if (boardState[startPosY - k][startPosX - k] == searchPiece) return true;
+        if (boardState[startPosY - k][startPosX - k] != none) break;
+        k++;
+    }
+    return false;
+}
+
+bool Board::findPawn(Move moveObject)
+{
+    int startPosX, startPosY;
+    std::tie(startPosX, startPosY) = moveObject.getStartTile();
+    ChessPieceType piece = moveObject.getPieceType();
+    ChessPieceType searchPiece = none;
+    if ((int)piece > 0) {
+        searchPiece = black_pawn;
+        if (checkTileCoordInBounds(startPosY + 1, startPosX - 1) && boardState[startPosY + 1][startPosX - 1] == searchPiece) return true;
+        if (checkTileCoordInBounds(startPosY + 1, startPosX + 1) && boardState[startPosY + 1][startPosX + 1] == searchPiece) return true;
+    }
+    else {
+        searchPiece = white_pawn;
+        if (checkTileCoordInBounds(startPosY - 1, startPosX - 1) && boardState[startPosY - 1][startPosX - 1] == searchPiece) return true;
+        if (checkTileCoordInBounds(startPosY - 1, startPosX + 1) && boardState[startPosY - 1][startPosX + 1] == searchPiece) return true;
+    }
+    return false;
+}
+
+bool Board::findQueen(Move moveObject)
+{
+    if (findBishop(moveObject, true) || findRook(moveObject, true)) return true;
+    return false;
+}
+
+bool Board::findKing(Move moveObject)
+{
+    int startPosX, startPosY;
+    std::tie(startPosX, startPosY) = moveObject.getStartTile();
+    ChessPieceType piece = moveObject.getPieceType();
+    ChessPieceType searchPiece = none;
+    if ((int)piece > 0) searchPiece = black_king;
+    else searchPiece = white_king;
+    int x[] = { -1, -1, -1, 0,
+                 0, 1, 1, 1 };
+    int y[] = { -1, 0, 1, -1,
+                 1, -1, 0, 1 };
+    for (int k = 0; k < 8; k++) {
+        int m = startPosY + x[k];
+        int n = startPosX + y[k];
+        if (checkTileCoordInBounds(m, n) && boardState[m][n] == searchPiece) return true;
+    }
+    return false;
+}
+
+int Board::isCheck(Move moveObject)
+{
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (boardState[i][j] == white_king) { // white king is in check
+                if (findKnight(moveObject)) return 1;
+                if (findPawn(moveObject)) return 1;
+                if (findRook(moveObject, false)) return 1;
+                if (findBishop(moveObject, false)) return 1;
+                if (findQueen(moveObject)) return 1;
+                if (findKing(moveObject)) return 1;
+            }
+
+            if (boardState[i][j] == black_king) { // black king is in check
+                if (findKnight(moveObject)) return 2;
+                if (findPawn(moveObject)) return 2;
+                if (findRook(moveObject, false)) return 2;
+                if (findBishop(moveObject, false)) return 2;
+                if (findQueen(moveObject)) return 2;
+                if (findKing(moveObject)) return 2;
+            }
+        }
+    }
+    return 0; // no one is in check
+}
+
+
+bool Board::isCheckMate(Move moveObject)
+{
+    int endPosX, endPosY;
+    std::tie(endPosX, endPosY) = moveObject.getEndTile();
+    bool check = false;
+    if (isCheck(moveObject) > 0) check = true;
+    if (isMoveValid(moveObject) && check) {
+        if (boardState[endPosY][endPosX] == white_king && isCheck(moveObject) == 1) {
+            gameEnd = true;
+            return true;
+        }
+        else if (boardState[endPosY][endPosX] == black_king && isCheck(moveObject) == 2) {
+            gameEnd = true;
+            return true;
+        }
+    }
     return false;
 }
 

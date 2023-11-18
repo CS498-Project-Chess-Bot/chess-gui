@@ -18,13 +18,15 @@ public:
 	Board();
 	~Board();
 	MoveResult makeMove(Move moveObject);
-	bool isCheckMate();
+	bool isCheckMate(Move moveObject);
 	bool isStalemate();
+	int isCheck(Move moveObject);
 	inline bool isWhiteTurn() const {return m_color;}
 	void resetBoard();
 	int getTurnCount() const;
 	std::vector<ChessPieceType> getBoardState();
 	std::string toFEN() const;
+	bool gameEnd = false;
 
 
 private:
@@ -33,6 +35,12 @@ private:
 	bool isClear(Move);
 	bool isOwnPiece(Move);
 	bool isOpposingPiece(Move);
+	bool findKnight(Move);
+	bool findRook(Move, bool);
+	bool findBishop(Move, bool);
+	bool findPawn(Move);
+	bool findQueen(Move);
+	bool findKing(Move);
 
 
 	int m_turns;
