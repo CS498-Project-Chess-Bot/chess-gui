@@ -75,150 +75,39 @@ bool Board::checkTileCoordInBounds(int x, int y) const {
     return true;
 }
 
-bool Board::isPathBlocked(Move moveObject)
+bool Board::isClear(Move moveObject)
 {
     int startPosX, startPosY, endPosX, endPosY;
     std::tie(startPosX, startPosY) = moveObject.getStartTile();
     std::tie(endPosX, endPosY) = moveObject.getEndTile();
     ChessPieceType piece = moveObject.getPieceType();
 
-    if (piece == white_pawn || piece == black_pawn) {
-        int distanceY = std::abs(endPosY - startPosY);
-        if ((startPosY == 1 || startPosY == 6) && (distanceY == 2)) {
-            for (int i = startPosY + 1; i < endPosY; i++) {
-                if (boardState[endPosY][i] != none) return true;
-            }
-            return false;
-        }
-        return false;
-    }
+    if (piece == white_knight || piece == black_knight)
+        return true;
 
+    int addToCol = 0;
+    int addToRow = 0;
 
-    if (piece == white_rook || piece == black_rook) {
-        if (startPosY < endPosY) {
-            for (int i = startPosY + 1; i < endPosY; i++) {
-                if (boardState[i][endPosX] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosY > endPosY) {
-            for (int i = startPosY - 1; i > endPosY; i--) {
-                if (boardState[i][endPosX] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosX < endPosX) {
-            for (int i = startPosX + 1; i < endPosX; i++) {
-                if (boardState[endPosY][i] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosX > endPosX) {
-            for (int i = startPosX - 1; i > endPosX; i--) {
-                if (boardState[endPosY][i] != none) return true;
-            }
-            return false;
-        }
-        else return false;
-    }
+    if(startPosX > endPosX)
+        addToCol -= 1;
+    if(startPosX < endPosX)
+        addToCol += 1;
+    if(startPosY > endPosY)
+        addToRow -= 1;
+    if(startPosY < endPosY)
+        addToRow += 1;
 
-    if (piece == white_bishop || piece == black_bishop) {
-        if (startPosY < endPosY && startPosX < endPosX) {
-            int j = startPosX;
-            for (int i = startPosY + 1; i < endPosY; i++) {
-                j++;
-                if (boardState[i][j] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosY < endPosY && startPosX > endPosX) {
-            int j = startPosX;
-            for (int i = startPosY + 1; i < endPosY; i++) {
-                j--;
-                if (boardState[i][j] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosY > endPosY && startPosX > endPosX) {
-            int j = startPosX;
-            for (int i = startPosY - 1; i > endPosY; i--) {
-                j--;
-                if (boardState[i][j] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosY > endPosY && startPosX < endPosX) {
-            int j = startPosX;
-            for (int i = startPosY - 1; i > endPosY; i--) {
-                j++;
-                if (boardState[i][j] != none) return true;
-            }
-            return false;
-        }
-        else return false;
-    }
+    int currentCol = startPosX + addToCol;
+    int currentRow = startPosY + addToRow;
 
-    if (piece == white_queen || piece == black_queen) {
-        if (startPosY < endPosY) {
-            for (int i = startPosY + 1; i < endPosY; i++) {
-                if (boardState[i][endPosX] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosY > endPosY) {
-            for (int i = startPosY - 1; i > endPosY; i--) {
-                if (boardState[i][endPosX] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosX < endPosX) {
-            for (int i = startPosX + 1; i < endPosX; i++) {
-                if (boardState[endPosY][i] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosX > endPosX) {
-            for (int i = startPosX - 1; i > endPosX; i--) {
-                if (boardState[endPosY][i] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosY < endPosY && startPosX < endPosX) {
-            int j = startPosX;
-            for (int i = startPosY + 1; i < endPosY; i++) {
-                j++;
-                if (boardState[i][j] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosY < endPosY && startPosX > endPosX) {
-            int j = startPosX;
-            for (int i = startPosY + 1; i < endPosY; i++) {
-                j--;
-                if (boardState[i][j] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosY > endPosY && startPosX > endPosX) {
-            int j = startPosX;
-            for (int i = startPosY - 1; i > endPosY; i--) {
-                j--;
-                if (boardState[i][j] != none) return true;
-            }
-            return false;
-        }
-        else if (startPosY > endPosY && startPosX < endPosX) {
-            int j = startPosX;
-            for (int i = startPosY - 1; i > endPosY; i--) {
-                j++;
-                if (boardState[i][j] != none) return true;
-            }
-            return false;
-        }
+    //std::cout << startPosX << ", " << startPosY << " " << currentCol << ", " << currentRow << " " << endPosX << ", " << endPosY << std::endl;
 
-        else return false;
-    }
-    else return false;
+    while((endPosX != currentCol) || (endPosY != currentRow)){
+        if(boardState[currentRow][currentCol] != none) return false;
+        currentCol += addToCol;
+        currentRow += addToRow;
+    }   return true;
+
 }
 
 bool Board::isOwnPiece(Move moveObject)
@@ -246,22 +135,49 @@ bool Board::isOpposingPiece(Move moveObject)
 }
 
 // Pass in inputs from Move class
-bool Board::makeMove(Move moveObject)
+MoveResult Board::makeMove(Move moveObject)
 {
     int startPosX, startPosY, endPosX, endPosY;
     std::tie(startPosX, startPosY) = moveObject.getStartTile();
     std::tie(endPosX, endPosY) = moveObject.getEndTile();
     ChessPieceType piece = moveObject.getPieceType();
 
-    if (isMoveValid(moveObject)) {
+    MoveResult res;
+    if (((res = isMoveValid(moveObject)) != MoveResult::Invalid) && isClear(moveObject)) {
         m_turns++;
         m_color = !m_color;
         boardState[startPosY][startPosX] = none;
         boardState[endPosY][endPosX] = piece;
-        return true;
+
+        if(piece == white_king) {
+            whiteCanCastleKing = false;
+            whiteCanCastleQueen = false;
+        }
+        else if(piece == black_king) {
+            blackCanCastleKing = false;
+            blackCanCastleQueen = false;
+        }
+        else if(piece == white_rook) {
+            if(startPosX == 0) {
+                whiteCanCastleQueen = false;
+            }
+            else if(startPosX == 7) {
+                whiteCanCastleKing = false;
+            }
+        }
+        else if(piece == black_rook) {
+            if(startPosX == 0) {
+                blackCanCastleQueen = false;
+            }
+            else if(startPosX == 7) {
+                blackCanCastleKing = false;
+            }
+        }
+
+        return res;
     }
 
-    return false;
+    return MoveResult::Invalid;
 }
 
 
@@ -282,6 +198,13 @@ void Board::resetBoard()
             boardState[i][j] = defaultBoard[i][j];
         }
     }
+
+    m_turns = 0;
+    m_captureCount = 0;
+    whiteCanCastleKing = true;
+    whiteCanCastleQueen = true;
+    blackCanCastleKing = true;
+    blackCanCastleQueen = true;
 }
 
 int Board::getTurnCount() const
@@ -290,106 +213,106 @@ int Board::getTurnCount() const
     return turnCount;
 }
 
-bool Board::isMoveValid(Move moveObject)
+MoveResult Board::isMoveValid(Move moveObject)
 {
     int startPosX, startPosY, endPosX, endPosY;
     std::tie(startPosX, startPosY) = moveObject.getStartTile();
     std::tie(endPosX, endPosY) = moveObject.getEndTile();
     ChessPieceType piece = moveObject.getPieceType();
+    bool isOppPiece = isOpposingPiece(moveObject);
+    bool isTeamPiece = isOwnPiece(moveObject);
+    bool isOccupied = isOppPiece || isTeamPiece;
+    int distanceX = std::abs(endPosX - startPosX);
+    int distanceY = std::abs(endPosY - startPosY);
 
-    if(piece == none) return false;
-    if((int)piece > 0 && !isWhiteTurn()) return false;
-    if((int)piece < 0 && isWhiteTurn()) return false;
+    if(piece == none) return MoveResult::Invalid;
+    if((int)piece > 0 && !isWhiteTurn()) return MoveResult::Invalid;
+    if((int)piece < 0 && isWhiteTurn()) return MoveResult::Invalid;
 
     if (piece == white_pawn || piece == black_pawn) {
-        int distanceX = std::abs(endPosX - startPosX);
-        int distanceY = std::abs(endPosY - startPosY);
-        if (piece == black_pawn && (endPosY - startPosY) > 0) return false; // check for direction
-        else if (piece == white_pawn && (endPosY - startPosY) < 0) return false; // check for direction
-        else if ((startPosY == 1 || startPosY == 6) && (distanceY == 2) && (distanceX == 0 || distanceX == 1)) { //pawn first move if moving 2
-            if (isPathBlocked(moveObject)) return false;
-            else if ((distanceX == 1 && distanceY == 1) && isOpposingPiece(moveObject)) return true;
-            else if (isOwnPiece(moveObject)) return false; // own piece at destination
-            else return true;
-        }
-        else if (distanceY == 1 && distanceX == 0) { // move straight forward
-            if (isPathBlocked(moveObject)) return false;
-            if (boardState[endPosY][endPosX] != none) return false;
-            else if (isOwnPiece(moveObject)) return false; // own piece at destination
-            else return true;
-        }
-        else if ((distanceX == 1 && distanceY == 1) && isOpposingPiece(moveObject)) { // move diagonal one to capture
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
 
-// if rook
-    if (piece == white_rook || piece == black_rook) {
-        if ((startPosX == endPosX) || (startPosY == endPosY)) {
-            if ((startPosX != endPosX) && (startPosY != endPosY)) return false; // moved diagonal
-            else if (isPathBlocked(moveObject)) return false;
-            else if (isOwnPiece(moveObject)) return false; // own piece at destination
-            else if (isOpposingPiece(moveObject)) return true;
-            else return true;
-        }
-        else
-            return false;
-    }
-
-// if knight
-    if (piece == black_knight || piece == white_knight) {
-        int absX = std::abs(endPosX-startPosX);
-        int absY = std::abs(endPosY-startPosY);
-        if ((absX*absX+absY*absY) == 5) {
-            if(isOwnPiece(moveObject)) return false;
-            if(boardState[endPosY][endPosX] != none){
-                m_captureCount++;
+        bool team = (piece == white_pawn);
+       
+        if (piece == black_pawn && (endPosY - startPosY) > 0) return MoveResult::Invalid; // check for direction
+        else if (piece == white_pawn && (endPosY - startPosY) < 0) return MoveResult::Invalid; // check for direction
+            
+        if(distanceX == 0 && !isOccupied){
+            if (distanceY == 2){
+                if(team && startPosY == 1) return MoveResult::Standard;
+                else if(!team && startPosY == 6) return MoveResult::Standard;
+                //save coordinates of where the pawn is for a potential enpessant
+                //turn on boolean value to erase coords in the next turn
             }
-            return true;
+            if(distanceY == 1) 
+                return MoveResult::Standard;
         }
-        else
-            return false;    
+        else if(distanceX == 1 && distanceY == 1 && isOppPiece)
+            return MoveResult::Standard;
+
     }
-//
-//else if queen
+
+    // if rook
+    if (piece == white_rook || piece == black_rook) {
+        if ((startPosX == endPosX) || (startPosY == endPosY)) { //if on same rank or file
+            //if the coords are in the right spot in relation to en pessant, 
+            //adjust boardstate respectively
+            //return unique en pessant value for app to facilitate movement
+            if (!isTeamPiece) 
+                return MoveResult::Standard;      //and not blocked
+        }
+    }
+
+
+    // if knight
+    if (piece == black_knight || piece == white_knight) {
+        if ((distanceX*distanceX+distanceY*distanceY) == 5){ 
+            if(!isTeamPiece) 
+                return MoveResult::Standard;
+        }
+    }
+
+    //else if queen
     if (piece == white_queen || piece == black_queen) {
-        if (endPosX == startPosX || endPosY == startPosY || std::abs(endPosX - startPosX) == std::abs(endPosY - startPosY)) {
-            if (isPathBlocked(moveObject)) return false;
-            else if (isOwnPiece(moveObject)) return false; // own piece at destination
-            else if (isOpposingPiece(moveObject)) return true;
-            else return true;
+        if (endPosX == startPosX || endPosY == startPosY || distanceX == distanceY) {
+            if (!isTeamPiece) 
+                return MoveResult::Standard; // own piece at destination
         }
-        else
-            return false;
     }
+    
 
-// if bishop
+    // if bishop
     if (piece == white_bishop || piece == black_bishop) {
-        if (std::abs(endPosX - startPosX) == std::abs(endPosY - startPosY)) {
-            if (isPathBlocked(moveObject)) return false;
-            else if (isOwnPiece(moveObject)) return false; // own piece at destination
-            else if (isOpposingPiece(moveObject)) return true;
-            else return true;
+        if (distanceX == distanceY) {
+            if (!isTeamPiece) 
+                return MoveResult::Standard; // own piece at destination
         }
-        else
-            return false;
-      }
-
-
-//else (king case)
-    if (piece == white_king || piece == black_king) {
-        if(std::abs(endPosX - startPosX) <= 1 && std::abs(endPosY - startPosY) <= 1){
-            if (isOwnPiece(moveObject)) return false; // own piece at destination
-            else if (isOpposingPiece(moveObject)) return true;
-            else return true;
-        }
-        else
-            return false;
     }
-    return true;
+
+    //else (king case)
+    if (piece == white_king || piece == black_king) {
+        //if castling
+        if(distanceX == 2 && piece == white_king) {
+            if((whiteCanCastleKing && startPosX < endPosX) || (whiteCanCastleQueen && startPosX > endPosX)) {
+                std::cout << "valid castle\n";
+                return MoveResult::Castle;
+            }
+        }
+        else if(distanceX == 2 && piece == black_king) {
+            if((blackCanCastleKing && startPosX < endPosX) || (blackCanCastleQueen && startPosX > endPosX)) {
+                return MoveResult::Castle;
+            }
+        }
+            //if king hasn't moved and rook in the corner haven't moved
+            //if king can pass to new square without seeing check
+            //if castling is initiated
+            //move king and rook -> return different value to trigger piece movement in app
+        if(distanceX <= 1 && distanceY <= 1) {
+            if (!isTeamPiece)
+                return MoveResult::Standard; // own piece at destination
+        }
+    }
+
+    return MoveResult::Invalid;
 }
 
 std::vector<ChessPieceType> Board::getBoardState() {

@@ -13,6 +13,11 @@
 #include <memory>
 #include <filesystem>
 #include <tuple>
+#include <stdexcept>
+#include <future>
+#include <array>
+#include <chrono>
+#include <thread>
 
 #include <glad/glad.h>
 #include <glfw/glfw3.h>

@@ -1,3 +1,6 @@
 [submodule "vendor/glm"]
 	path = vendor/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "chess-engine"]
+	path = chess-engine
+	url = https://github.com/CS498-Project-Chess-Bot/chess-engine.git
