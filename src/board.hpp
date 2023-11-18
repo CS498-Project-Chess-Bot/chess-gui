@@ -46,6 +46,7 @@ private:
 	int m_turns;
 	int m_captureCount = 0;
 	bool m_color = true; // true when white, false when black
+	bool m_check = false;
 	const static int m_rows = 8;
 	const static int m_cols = 8;
 	using enum ChessPieceType;

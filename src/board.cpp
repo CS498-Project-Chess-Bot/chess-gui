@@ -145,6 +145,11 @@ MoveResult Board::makeMove(Move moveObject)
         m_color = !m_color;
         boardState[startPosY][startPosX] = none;
         boardState[endPosY][endPosX] = piece;
+        if (isCheck(moveObject) > 0) {
+            m_check = true;
+            isCheckMate(moveObject);
+        }
+        else m_check = false;
 
         if(piece == white_king) {
             whiteCanCastleKing = false;
@@ -360,9 +365,7 @@ bool Board::isCheckMate(Move moveObject)
 {
     int endPosX, endPosY;
     std::tie(endPosX, endPosY) = moveObject.getEndTile();
-    bool check = false;
-    if (isCheck(moveObject) > 0) check = true;
-    if (isMoveValid(moveObject) && check) {
+    if (isMoveValid(moveObject) && m_check) {
         if (boardState[endPosY][endPosX] == white_king && isCheck(moveObject) == 1) {
             gameEnd = true;
             return true;
@@ -464,7 +467,7 @@ MoveResult Board::isMoveValid(Move moveObject)
     if (piece == white_queen || piece == black_queen) {
         if (endPosX == startPosX || endPosY == startPosY || distanceX == distanceY) {
             if (!isTeamPiece) 
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard; 
         }
     }
     
@@ -473,7 +476,7 @@ MoveResult Board::isMoveValid(Move moveObject)
     if (piece == white_bishop || piece == black_bishop) {
         if (distanceX == distanceY) {
             if (!isTeamPiece) 
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard;
         }
     }
 
@@ -497,7 +500,7 @@ MoveResult Board::isMoveValid(Move moveObject)
             //move king and rook -> return different value to trigger piece movement in app
         if(distanceX <= 1 && distanceY <= 1) {
             if (!isTeamPiece)
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard; 
         }
     }
 
