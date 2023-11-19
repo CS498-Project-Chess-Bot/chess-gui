@@ -69,6 +69,7 @@ int App::run() {
     engineResult = std::async(Command::exec, "python ./chess-engine/Game.py");
     while (!glfwWindowShouldClose(window))
     {
+        processInput();
         if(shouldResetGame) {
             chessBoard = createRef<ChessBoardModel2D>((bool)(rand()%2));
             shouldResetGame = false;
@@ -81,10 +82,6 @@ int App::run() {
             engineResult = std::async(Command::exec, "python ./chess-engine/Game.py");
         }
 
-
-        // input
-        // -----
-        processInput();
         if(m_mousePressed_x != -1 && m_mousePressed_y != -1) {
             glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)s_width/(float)s_height, 0.1f, 100.0f);
             glm::vec3 mouseWorld = mousePosToWorld(m_mousePressed_x, m_mousePressed_y, camera, projection, s_width, s_height);
@@ -143,6 +140,7 @@ int App::run() {
 }
 
 void App::processInput() {
+    glfwPollEvents();
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
