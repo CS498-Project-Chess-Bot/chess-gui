@@ -18,6 +18,7 @@
 #include <array>
 #include <chrono>
 #include <thread>
+#include <cstdlib>
 
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
