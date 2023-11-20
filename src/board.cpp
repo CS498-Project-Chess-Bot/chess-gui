@@ -141,16 +141,24 @@ MoveResult Board::makeMove(Move moveObject)
 
     MoveResult res;
     if (((res = isMoveValid(moveObject)) != MoveResult::Invalid) && isClear(moveObject)) {
-        m_turns++;
-        m_color = !m_color;
+        auto temp_piece = boardState[endPosY][endPosX];
         boardState[startPosY][startPosX] = none;
         boardState[endPosY][endPosX] = piece;
-        if (isCheck(moveObject) > 0) {
-            CORE_ASSERT(false, "Check!");
-            m_check = true;
-            isCheckMate(moveObject);
+        int temp_check = isCheck(moveObject);
+        std::cout << m_check << ", " << temp_check << ", " << ((int)!m_color)+1 << std::endl;
+        if (temp_check > 0 && (((((int)!m_color)+1)==temp_check) || m_check > 0)) {
+            //CORE_ASSERT(false, "Illegal Move: In check!");
+            boardState[startPosY][startPosX] = piece;
+            boardState[endPosY][endPosX] = temp_piece;
+            return MoveResult::Invalid;
         }
-        else m_check = false;
+        else {
+            m_check = temp_check;
+        }
+
+        m_turns++;
+        m_color = !m_color;
+        
 
         if(piece == white_king) {
             whiteCanCastleKing = false;
