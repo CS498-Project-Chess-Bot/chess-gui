@@ -400,6 +400,11 @@ void Board::resetBoard()
     whiteCanCastleQueen = true;
     blackCanCastleKing = true;
     blackCanCastleQueen = true;
+
+    // epX1 = -1;
+    // epX2 = -1;
+    // epY1 = -1;
+    // epY2 = -1;
 }
 
 int Board::getTurnCount() const
@@ -424,6 +429,11 @@ MoveResult Board::isMoveValid(Move moveObject)
     if((int)piece > 0 && !isWhiteTurn()) return MoveResult::Invalid;
     if((int)piece < 0 && isWhiteTurn()) return MoveResult::Invalid;
 
+    //get EP coords from last turn and free up more for my turn
+    //epX2 = epX1; 
+    //epX1 = -1;
+    //epY2 = epY1; 
+    //epY1 = -1;
     if (piece == white_pawn || piece == black_pawn) {
 
         bool team = (piece == white_pawn);
@@ -433,27 +443,34 @@ MoveResult Board::isMoveValid(Move moveObject)
             
         if(distanceX == 0 && !isOccupied){
             if (distanceY == 2){
+                //save coordinates of where the pawn is for a potential enpessant
+                //epX1 = endPosX;
+                //epY1 = endPosY;
                 if(team && startPosY == 1) return MoveResult::Standard;
                 else if(!team && startPosY == 6) return MoveResult::Standard;
-                //save coordinates of where the pawn is for a potential enpessant
-                //turn on boolean value to erase coords in the next turn
             }
             if(distanceY == 1) 
                 return MoveResult::Standard;
         }
-        else if(distanceX == 1 && distanceY == 1 && isOppPiece)
-            return MoveResult::Standard;
+        else if(distanceX == 1 && distanceY == 1){
+            if (isOppPiece) return MoveResult::Standard;
+            
+            // if (endPosX == epX2){
+            //     if(team && epY2 + 1 == endPosY) 
+            //         return MoveResult::EnPassant; 
+            //     if(!team && epY2 - 1 == endPosY)
+            //         return MoveResult::EnPassant;
+            // }
+        }
+            
 
     }
 
     // if rook
     if (piece == white_rook || piece == black_rook) {
-        if ((startPosX == endPosX) || (startPosY == endPosY)) { //if on same rank or file
-            //if the coords are in the right spot in relation to en pessant, 
-            //adjust boardstate respectively
-            //return unique en pessant value for app to facilitate movement
+        if ((startPosX == endPosX) || (startPosY == endPosY)) { 
             if (!isTeamPiece) 
-                return MoveResult::Standard;      //and not blocked
+                return MoveResult::Standard;     
         }
     }
 
@@ -470,7 +487,7 @@ MoveResult Board::isMoveValid(Move moveObject)
     if (piece == white_queen || piece == black_queen) {
         if (endPosX == startPosX || endPosY == startPosY || distanceX == distanceY) {
             if (!isTeamPiece) 
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard;
         }
     }
     
@@ -479,7 +496,7 @@ MoveResult Board::isMoveValid(Move moveObject)
     if (piece == white_bishop || piece == black_bishop) {
         if (distanceX == distanceY) {
             if (!isTeamPiece) 
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard;
         }
     }
 
@@ -497,13 +514,9 @@ MoveResult Board::isMoveValid(Move moveObject)
                 return MoveResult::Castle;
             }
         }
-            //if king hasn't moved and rook in the corner haven't moved
-            //if king can pass to new square without seeing check
-            //if castling is initiated
-            //move king and rook -> return different value to trigger piece movement in app
         if(distanceX <= 1 && distanceY <= 1) {
             if (!isTeamPiece)
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard; 
         }
     }
 
