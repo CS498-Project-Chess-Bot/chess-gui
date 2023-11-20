@@ -80,6 +80,14 @@ bool ChessBoardModel2D::tryMove(Move m) {
             }
         }
 
+        if(res == MoveResult::EnPassant){
+            if(piece == ChessPieceType::white_pawn){
+                m_children[endIdx-8]->getChildren().clear();
+            }else{
+                m_children[endIdx+8]->getChildren().clear();
+            }
+        }
+
     }
     return res != MoveResult::Invalid;
 }

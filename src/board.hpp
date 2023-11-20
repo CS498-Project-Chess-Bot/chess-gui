@@ -67,9 +67,9 @@ private:
 	bool blackCanCastleQueen = true;
 	bool blackCanCastleKing = true;
 
-	int epXPos1 = -1;
-	int epXPos2 = -1;
-	int epYPos1 = -1;
-	int epYPos2 = -1;
+	int epX1 = -1;
+	int epX2 = -1;
+	int epY1 = -1;
+	int epY2 = -1;
 };
 #endif

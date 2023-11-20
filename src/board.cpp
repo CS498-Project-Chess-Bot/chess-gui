@@ -401,10 +401,10 @@ void Board::resetBoard()
     blackCanCastleKing = true;
     blackCanCastleQueen = true;
 
-    // epX1 = -1;
-    // epX2 = -1;
-    // epY1 = -1;
-    // epY2 = -1;
+    epX1 = -1;
+    epX2 = -1;
+    epY1 = -1;
+    epY2 = -1;
 }
 
 int Board::getTurnCount() const
@@ -430,10 +430,10 @@ MoveResult Board::isMoveValid(Move moveObject)
     if((int)piece < 0 && isWhiteTurn()) return MoveResult::Invalid;
 
     //get EP coords from last turn and free up more for my turn
-    //epX2 = epX1; 
-    //epX1 = -1;
-    //epY2 = epY1; 
-    //epY1 = -1;
+    epX2 = epX1; 
+    epX1 = -1;
+    epY2 = epY1; 
+    epY1 = -1;
     if (piece == white_pawn || piece == black_pawn) {
 
         bool team = (piece == white_pawn);
@@ -444,8 +444,8 @@ MoveResult Board::isMoveValid(Move moveObject)
         if(distanceX == 0 && !isOccupied){
             if (distanceY == 2){
                 //save coordinates of where the pawn is for a potential enpessant
-                //epX1 = endPosX;
-                //epY1 = endPosY;
+                epX1 = endPosX;
+                epY1 = endPosY;
                 if(team && startPosY == 1) return MoveResult::Standard;
                 else if(!team && startPosY == 6) return MoveResult::Standard;
             }
@@ -455,12 +455,12 @@ MoveResult Board::isMoveValid(Move moveObject)
         else if(distanceX == 1 && distanceY == 1){
             if (isOppPiece) return MoveResult::Standard;
             
-            // if (endPosX == epX2){
-            //     if(team && epY2 + 1 == endPosY) 
-            //         return MoveResult::EnPassant; 
-            //     if(!team && epY2 - 1 == endPosY)
-            //         return MoveResult::EnPassant;
-            // }
+            if (endPosX == epX2){
+                if(team && epY2 + 1 == endPosY) 
+                    return MoveResult::EnPassant; 
+                if(!team && epY2 - 1 == endPosY)
+                    return MoveResult::EnPassant;
+            }
         }
             
 
