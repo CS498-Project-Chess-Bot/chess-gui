@@ -25,6 +25,7 @@ public:
 	void resetBoard();
 	int getTurnCount() const;
 	std::vector<ChessPieceType> getBoardState();
+	void setBoardStateAt(int x, int y, ChessPieceType piece);
 	std::string toFEN() const;
 	bool gameEnd = false;
 

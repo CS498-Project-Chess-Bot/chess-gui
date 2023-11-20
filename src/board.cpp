@@ -429,7 +429,7 @@ MoveResult Board::isMoveValid(Move moveObject)
     if((int)piece > 0 && !isWhiteTurn()) return MoveResult::Invalid;
     if((int)piece < 0 && isWhiteTurn()) return MoveResult::Invalid;
 
-    //get EP coords from last turn and free up more for my turn
+    //get EnPassant coords from last turn and free up more for my turn
     epX2 = epX1; 
     epX1 = -1;
     epY2 = epY1; 
@@ -441,20 +441,28 @@ MoveResult Board::isMoveValid(Move moveObject)
         if (piece == black_pawn && (endPosY - startPosY) > 0) return MoveResult::Invalid; // check for direction
         else if (piece == white_pawn && (endPosY - startPosY) < 0) return MoveResult::Invalid; // check for direction
             
+        //advancing
         if(distanceX == 0 && !isOccupied){
             if (distanceY == 2){
-                //save coordinates of where the pawn is for a potential enpessant
+                //save coordinates of where the pawn is for a potential en passant
                 epX1 = endPosX;
                 epY1 = endPosY;
                 if(team && startPosY == 1) return MoveResult::Standard;
                 else if(!team && startPosY == 6) return MoveResult::Standard;
             }
-            if(distanceY == 1) 
+            if(distanceY == 1) {
+                if((team && endPosY == 7) || (!team && endPosY == 0)){ 
+                    return MoveResult::Promotion;
+                }
                 return MoveResult::Standard;
-        }
-        else if(distanceX == 1 && distanceY == 1){
-            if (isOppPiece) return MoveResult::Standard;
-            
+            }
+        }else if(distanceX == 1 && distanceY == 1){          //capturing
+            if (isOppPiece){ 
+                if((team && endPosY == 7) || (!team && endPosY == 0)){ 
+                    return MoveResult::Promotion;
+                }
+                return MoveResult::Standard;
+            }
             if (endPosX == epX2){
                 if(team && epY2 + 1 == endPosY) 
                     return MoveResult::EnPassant; 
@@ -462,11 +470,8 @@ MoveResult Board::isMoveValid(Move moveObject)
                     return MoveResult::EnPassant;
             }
         }
-            
-
     }
 
-    // if rook
     if (piece == white_rook || piece == black_rook) {
         if ((startPosX == endPosX) || (startPosY == endPosY)) { 
             if (!isTeamPiece) 
@@ -474,8 +479,6 @@ MoveResult Board::isMoveValid(Move moveObject)
         }
     }
 
-
-    // if knight
     if (piece == black_knight || piece == white_knight) {
         if ((distanceX*distanceX+distanceY*distanceY) == 5){ 
             if(!isTeamPiece) 
@@ -483,7 +486,6 @@ MoveResult Board::isMoveValid(Move moveObject)
         }
     }
 
-    //else if queen
     if (piece == white_queen || piece == black_queen) {
         if (endPosX == startPosX || endPosY == startPosY || distanceX == distanceY) {
             if (!isTeamPiece) 
@@ -491,8 +493,6 @@ MoveResult Board::isMoveValid(Move moveObject)
         }
     }
     
-
-    // if bishop
     if (piece == white_bishop || piece == black_bishop) {
         if (distanceX == distanceY) {
             if (!isTeamPiece) 
@@ -500,9 +500,8 @@ MoveResult Board::isMoveValid(Move moveObject)
         }
     }
 
-    //else (king case)
     if (piece == white_king || piece == black_king) {
-        //if castling
+        //castling
         if(distanceX == 2 && piece == white_king) {
             if((whiteCanCastleKing && startPosX < endPosX) || (whiteCanCastleQueen && startPosX > endPosX)) {
                 std::cout << "valid castle\n";
@@ -514,6 +513,7 @@ MoveResult Board::isMoveValid(Move moveObject)
                 return MoveResult::Castle;
             }
         }
+        //moving
         if(distanceX <= 1 && distanceY <= 1) {
             if (!isTeamPiece)
                 return MoveResult::Standard; 
@@ -521,6 +521,11 @@ MoveResult Board::isMoveValid(Move moveObject)
     }
 
     return MoveResult::Invalid;
+}
+
+void Board::setBoardStateAt(int x, int y, ChessPieceType piece){
+    std::cout << "promo" << std::endl;
+    boardState[x][y] = piece;
 }
 
 std::vector<ChessPieceType> Board::getBoardState() {

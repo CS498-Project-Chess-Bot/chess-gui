@@ -88,6 +88,52 @@ bool ChessBoardModel2D::tryMove(Move m) {
             }
         }
 
+        if(res == MoveResult::Promotion){
+            ChessPieceType pieceToPromoteTo;
+            int x;
+            while(true){
+                std::cout << "What piece do you want? 1 - Queen, 2 - Rook, 3 - Bishop, 4 - Knight";
+                std::cin >> x;
+                switch(x){
+                    case 1:
+                        if(piece == ChessPieceType::white_pawn) {
+                            pieceToPromoteTo = ChessPieceType::white_queen;
+                        }else{
+                            pieceToPromoteTo = ChessPieceType::black_queen;
+                        }
+                        break;
+                    case 2:
+                        if(piece == ChessPieceType::white_pawn) {
+                            pieceToPromoteTo = ChessPieceType::white_rook;
+                        }else{
+                            pieceToPromoteTo = ChessPieceType::black_rook;
+                        }
+                        break;
+                    case 3:
+                        if(piece == ChessPieceType::white_pawn) {
+                            pieceToPromoteTo = ChessPieceType::white_bishop;
+                        }else{
+                            pieceToPromoteTo = ChessPieceType::black_bishop;
+                        }
+                        break;
+                    case 4:
+                        if(piece == ChessPieceType::white_pawn) {
+                            pieceToPromoteTo = ChessPieceType::white_knight;
+                        }else{
+                            pieceToPromoteTo = ChessPieceType::black_knight;
+                        }
+                        break;
+                    default:
+                        continue;
+                }
+                break;
+            }
+            m_gameBoard.setBoardStateAt(endX, endY, pieceToPromoteTo);
+            m_children[endIdx]->getChildren().clear();
+            Ref<ChessPieceModel2D> promotesTo = createRef<ChessPieceModel2D>(pieceToPromoteTo);
+            m_children[endIdx]->addChild(promotesTo);
+        }
+
     }
     return res != MoveResult::Invalid;
 }
