@@ -89,53 +89,113 @@ bool ChessBoardModel2D::tryMove(Move m) {
         }
 
         if(res == MoveResult::Promotion){
-            ChessPieceType pieceToPromoteTo;
-            int x;
-            while(true){
-                std::cout << "What piece do you want? 1 - Queen, 2 - Rook, 3 - Bishop, 4 - Knight";
-                std::cin >> x;
-                switch(x){
-                    case 1:
-                        if(piece == ChessPieceType::white_pawn) {
-                            pieceToPromoteTo = ChessPieceType::white_queen;
-                        }else{
-                            pieceToPromoteTo = ChessPieceType::black_queen;
-                        }
-                        break;
-                    case 2:
-                        if(piece == ChessPieceType::white_pawn) {
-                            pieceToPromoteTo = ChessPieceType::white_rook;
-                        }else{
-                            pieceToPromoteTo = ChessPieceType::black_rook;
-                        }
-                        break;
-                    case 3:
-                        if(piece == ChessPieceType::white_pawn) {
-                            pieceToPromoteTo = ChessPieceType::white_bishop;
-                        }else{
-                            pieceToPromoteTo = ChessPieceType::black_bishop;
-                        }
-                        break;
-                    case 4:
-                        if(piece == ChessPieceType::white_pawn) {
-                            pieceToPromoteTo = ChessPieceType::white_knight;
-                        }else{
-                            pieceToPromoteTo = ChessPieceType::black_knight;
-                        }
-                        break;
-                    default:
-                        continue;
-                }
-                break;
-            }
-            m_gameBoard.setBoardStateAt(endX, endY, pieceToPromoteTo);
-            m_children[endIdx]->getChildren().clear();
-            Ref<ChessPieceModel2D> promotesTo = createRef<ChessPieceModel2D>(pieceToPromoteTo);
-            m_children[endIdx]->addChild(promotesTo);
-        }
 
+            int saveDir = 0;
+            if(piece == ChessPieceType::white_pawn){
+                saveDir -= 8;
+            }else{
+                saveDir += 8;
+            }
+
+            std::cout << "checkpoint1" << std::endl;
+
+            //save states of the 3 squares below before clearing and displaying promotion choices
+            //for(int i = 1; i < 4; i++)
+            //    saved[i-1] = m_children[endIdx + saveDir * i]->getChildren().front();
+            
+            std::cout << "checkpoint2" << std::endl;
+
+            for(int i = 0; i < 4; i++){
+                m_children[endIdx + saveDir * i]->getChildren().clear();
+            }
+
+
+            if(piece == ChessPieceType::white_pawn){
+                Ref<ChessPieceModel2D> wq = createRef<ChessPieceModel2D>(ChessPieceType::white_queen);
+                Ref<ChessPieceModel2D> wr = createRef<ChessPieceModel2D>(ChessPieceType::white_rook);
+                Ref<ChessPieceModel2D> wb = createRef<ChessPieceModel2D>(ChessPieceType::white_bishop);
+                Ref<ChessPieceModel2D> wk = createRef<ChessPieceModel2D>(ChessPieceType::white_knight);
+
+                m_children[endIdx]->addChild(wq);
+                m_children[endIdx + saveDir]->addChild(wr);
+                m_children[endIdx + saveDir * 2]->addChild(wb);
+                m_children[endIdx + saveDir * 3]->addChild(wk);
+            }else{
+                Ref<ChessPieceModel2D> bq = createRef<ChessPieceModel2D>(ChessPieceType::black_queen);
+                Ref<ChessPieceModel2D> br = createRef<ChessPieceModel2D>(ChessPieceType::black_rook);
+                Ref<ChessPieceModel2D> bb = createRef<ChessPieceModel2D>(ChessPieceType::black_bishop);
+                Ref<ChessPieceModel2D> bk = createRef<ChessPieceModel2D>(ChessPieceType::black_knight);
+
+                m_children[endIdx]->addChild(bq);
+                m_children[endIdx + saveDir]->addChild(br);
+                m_children[endIdx + saveDir * 2]->addChild(bb);
+                m_children[endIdx + saveDir * 3]->addChild(bk);
+            }
+
+            //flag app to handle promotion selection
+            needsPromotionSelection = true;
+        }
     }
+
     return res != MoveResult::Invalid;
+}
+
+void ChessBoardModel2D::promotePiece(int tileX, int tileY){
+    
+    //determine chosen piece
+    ChessPieceType pieceChoice;
+    switch(tileY){
+        case 0:
+            pieceChoice = ChessPieceType::black_queen;
+            break;
+        case 1:
+            pieceChoice = ChessPieceType::black_rook;
+            break;
+        case 2:
+            pieceChoice = ChessPieceType::black_bishop;
+            break;
+        case 3:
+            pieceChoice = ChessPieceType::black_knight;
+            break;
+        case 4:
+            pieceChoice = ChessPieceType::white_knight;
+            break;
+        case 5:
+            pieceChoice = ChessPieceType::white_bishop;
+            break;
+        case 6:
+            pieceChoice = ChessPieceType::white_rook;
+            break;
+        case 7:
+            pieceChoice = ChessPieceType::white_queen;
+            break;
+    }
+    Ref<ChessPieceModel2D> promotedPiece = createRef<ChessPieceModel2D>(pieceChoice);
+
+    //change piece to selected piece
+    int saveDir = 0;
+    int promoPos = -1;
+    if(tileY >= 4){
+        promoPos = tileX + 56;
+        m_children[promoPos]->getChildren().clear();
+        m_children[promoPos]->addChild(promotedPiece);
+        //m_gameBoard.setBoardStateAt(tileX, 7, pieceChoice);
+        saveDir -= 8;
+    }else{
+        promoPos = tileX;
+        m_children[promoPos]->getChildren().clear();
+        m_children[promoPos]->addChild(promotedPiece);
+        //m_gameBoard.setBoardStateAt(tileX, 0, pieceChoice);
+        saveDir += 8;
+    }
+
+    //reset remaining covered pieces
+    for(int i = 1; i < 4; i++){
+       m_children[promoPos + saveDir * i]->getChildren().clear();
+    //   m_children[promoPos + saveDir * i]->addChild(saved[i-1]);
+    }
+
+    needsPromotionSelection = false;
 }
 
 bool ChessBoardModel2D::getHitTile(Camera& cam, glm::vec3 rayDir, int* x, int* y) {
@@ -155,7 +215,8 @@ bool ChessBoardModel2D::getHitTile(Camera& cam, glm::vec3 rayDir, int* x, int* y
     return false;
 }
 
-void ChessBoardModel2D::setTileHightlight(int x, int y, bool b) {
+void ChessBoardModel2D::setTileHightlight(int x, int
+ y, bool b) {
     if( x < 0 || x > CHESS_COLS-1 || y < 0 || y > CHESS_ROWS-1)
         CORE_ASSERT(false, "Invalid tile coords!");
 

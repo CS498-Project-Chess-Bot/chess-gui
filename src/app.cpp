@@ -91,10 +91,15 @@ int App::run() {
             bool hits = chessBoard->getHitTile(camera, raydir, &tileX, &tileY);
             if(hits) {
                 if(!firstTileSelected) {
-                    chessBoard->clearHightlighting();
-                    firstTileSelected = true;
-                    firstTileX = tileX;
-                    firstTileY = tileY;
+                    if(chessBoard->needsPromotionSelection){
+                        //need to include logic to verify that the player has actually clicked one of the options
+                        chessBoard->promotePiece(tileX, tileY);
+                    }else{
+                        chessBoard->clearHightlighting();
+                        firstTileSelected = true;
+                        firstTileX = tileX;
+                        firstTileY = tileY;
+                    }
                 }
                 else {
                     chessBoard->setTileHightlight(firstTileX, firstTileY, false);
