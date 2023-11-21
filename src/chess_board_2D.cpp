@@ -100,8 +100,11 @@ bool ChessBoardModel2D::tryMove(Move m) {
             std::cout << "checkpoint1" << std::endl;
 
             //save states of the 3 squares below before clearing and displaying promotion choices
-            //for(int i = 1; i < 4; i++)
-            //    saved[i-1] = m_children[endIdx + saveDir * i]->getChildren().front();
+            for(int i = 1; i < 4; i++){
+                if (!m_children[endIdx + saveDir * i]->getChildren().empty())
+                    saved[i-1] = m_children[endIdx + saveDir * i]->getChildren().front();
+            }
+
             
             std::cout << "checkpoint2" << std::endl;
 
@@ -179,20 +182,22 @@ void ChessBoardModel2D::promotePiece(int tileX, int tileY){
         promoPos = tileX + 56;
         m_children[promoPos]->getChildren().clear();
         m_children[promoPos]->addChild(promotedPiece);
-        //m_gameBoard.setBoardStateAt(tileX, 7, pieceChoice);
+        m_gameBoard.setBoardStateAt(tileX, 7, pieceChoice);
         saveDir -= 8;
     }else{
         promoPos = tileX;
         m_children[promoPos]->getChildren().clear();
         m_children[promoPos]->addChild(promotedPiece);
-        //m_gameBoard.setBoardStateAt(tileX, 0, pieceChoice);
+        m_gameBoard.setBoardStateAt(tileX, 0, pieceChoice);
         saveDir += 8;
     }
 
     //reset remaining covered pieces
     for(int i = 1; i < 4; i++){
-       m_children[promoPos + saveDir * i]->getChildren().clear();
-    //   m_children[promoPos + saveDir * i]->addChild(saved[i-1]);
+        m_children[promoPos + saveDir * i]->getChildren().clear();
+        if(saved[i-1])
+            m_children[promoPos + saveDir * i]->addChild(saved[i-1]);    
+        saved[i-1] = nullptr;
     }
 
     needsPromotionSelection = false;

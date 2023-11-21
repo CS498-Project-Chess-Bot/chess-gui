@@ -525,7 +525,7 @@ MoveResult Board::isMoveValid(Move moveObject)
 
 void Board::setBoardStateAt(int x, int y, ChessPieceType piece){
     std::cout << "promo" << std::endl;
-    boardState[x][y] = piece;
+    boardState[y][x] = piece;
 }
 
 std::vector<ChessPieceType> Board::getBoardState() {
