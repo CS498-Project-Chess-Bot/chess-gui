@@ -10,8 +10,10 @@
 
 uint32_t App::s_height = 0;
 uint32_t App::s_width = 0;
+static bool shouldResetGame = true;
 
 static glm::vec3 mousePosToWorld(double& x, double& y, Camera cam, glm::mat4 proj, int screenWidth, int screenHeight);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods); 
 
 App::App(int width, int height, const std::string title) 
 {
@@ -36,6 +38,8 @@ App::App(int width, int height, const std::string title)
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, (GLFWframebuffersizefun)framebuffer_size_callback);
 
+    glfwSetKeyCallback(window, (GLFWkeyfun) key_callback);
+
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -49,11 +53,12 @@ App::App(int width, int height, const std::string title)
     s_width = width;
     s_height = height;
 
+    srand(time(NULL));
 }
 
 int App::run() {
 
-    Ref<ChessBoardModel2D> chessBoard = createRef<ChessBoardModel2D>(true);
+    Ref<ChessBoardModel2D> chessBoard;
 
     Camera camera({3.5f, 3.5f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
 
@@ -64,7 +69,11 @@ int App::run() {
     engineResult = std::async(Command::exec, "python ./chess-engine/Game.py");
     while (!glfwWindowShouldClose(window))
     {
-        
+        processInput();
+        if(shouldResetGame) {
+            chessBoard = createRef<ChessBoardModel2D>((bool)(rand()%2));
+            shouldResetGame = false;
+        }
 
         std::future_status engineStatus = engineResult.wait_for(std::chrono::seconds(0));
         if(engineStatus == std::future_status::ready) {
@@ -73,10 +82,6 @@ int App::run() {
             engineResult = std::async(Command::exec, "python ./chess-engine/Game.py");
         }
 
-
-        // input
-        // -----
-        processInput();
         if(m_mousePressed_x != -1 && m_mousePressed_y != -1) {
             glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)s_width/(float)s_height, 0.1f, 100.0f);
             glm::vec3 mouseWorld = mousePosToWorld(m_mousePressed_x, m_mousePressed_y, camera, projection, s_width, s_height);
@@ -86,10 +91,15 @@ int App::run() {
             bool hits = chessBoard->getHitTile(camera, raydir, &tileX, &tileY);
             if(hits) {
                 if(!firstTileSelected) {
-                    chessBoard->clearHightlighting();
-                    firstTileSelected = true;
-                    firstTileX = tileX;
-                    firstTileY = tileY;
+                    if(chessBoard->needsPromotionSelection){
+                        //need to include logic to verify that the player has actually clicked one of the options
+                        chessBoard->promotePiece(tileX, tileY);
+                    }else{
+                        chessBoard->clearHightlighting();
+                        firstTileSelected = true;
+                        firstTileX = tileX;
+                        firstTileY = tileY;
+                    }
                 }
                 else {
                     chessBoard->setTileHightlight(firstTileX, firstTileY, false);
@@ -135,6 +145,7 @@ int App::run() {
 }
 
 void App::processInput() {
+    glfwPollEvents();
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
@@ -145,6 +156,8 @@ void App::processInput() {
         glfwGetCursorPos(window, &m_mousePressed_x, &m_mousePressed_y);
     }
     m_oldMouseState = currentMouseState;
+
+
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -168,4 +181,10 @@ static glm::vec3 mousePosToWorld(double& x, double& y, Camera cam, glm::mat4 pro
     mousePos = invMat * mousePos;
     mousePos /= mousePos.w;
     return glm::vec3(mousePos.x, mousePos.y, mousePos.z);
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+        shouldResetGame = true;
 }

@@ -13,9 +13,11 @@ class ChessBoardModel2D : public Object {
 public:
     ChessBoardModel2D(bool isPlayerWhite = true);
     ~ChessBoardModel2D();
+    bool needsPromotionSelection = false;
 
     inline Board& getGameBoard() { return m_gameBoard; }
     bool tryMove(Move m);
+    void promotePiece(int tileX, int tileY);
     bool getHitTile(Camera& cam, glm::vec3 rayDir, int* x, int* y);
     void setTileHightlight(int x, int y, bool b);
     inline void clearHightlighting() {
@@ -27,6 +29,7 @@ public:
 private:
     Board m_gameBoard;
     bool m_isPlayerWhite;
+    Ref<Object> saved[3] = {nullptr, nullptr, nullptr};
 
 };
 

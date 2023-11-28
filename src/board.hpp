@@ -18,13 +18,16 @@ public:
 	Board();
 	~Board();
 	MoveResult makeMove(Move moveObject);
-	bool isCheckMate();
+	bool isCheckMate(Move moveObject);
 	bool isStalemate();
+	int isCheck(Move moveObject);
 	inline bool isWhiteTurn() const {return m_color;}
 	void resetBoard();
 	int getTurnCount() const;
 	std::vector<ChessPieceType> getBoardState();
+	void setBoardStateAt(int x, int y, ChessPieceType piece);
 	std::string toFEN() const;
+	bool gameEnd = false;
 
 
 private:
@@ -33,11 +36,18 @@ private:
 	bool isClear(Move);
 	bool isOwnPiece(Move);
 	bool isOpposingPiece(Move);
+	bool findKnight(Move, int, int, int);
+	bool findRook(Move, int, int, bool, int);
+	bool findBishop(Move, int, int, bool, int);
+	bool findPawn(Move, int, int, int);
+	bool findQueen(Move, int, int, int);
+	bool findKing(Move, int, int, int);
 
 
 	int m_turns;
 	int m_captureCount = 0;
 	bool m_color = true; // true when white, false when black
+	int m_check = 0;
 	const static int m_rows = 8;
 	const static int m_cols = 8;
 	using enum ChessPieceType;
@@ -57,5 +67,10 @@ private:
 	bool whiteCanCastleKing = true;
 	bool blackCanCastleQueen = true;
 	bool blackCanCastleKing = true;
+
+	int epX1 = -1;
+	int epX2 = -1;
+	int epY1 = -1;
+	int epY2 = -1;
 };
 #endif

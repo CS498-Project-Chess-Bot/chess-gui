@@ -54,8 +54,6 @@ Board::Board(std::string FEN)
 }
 
 Board::Board(){
-    m_turns = 0;
-    m_captureCount = 0;
     resetBoard();
 }
 
@@ -65,11 +63,11 @@ Board::~Board() {
 
 bool Board::checkTileCoordInBounds(int x, int y) const {
     if(x < 0 || x > m_cols-1){
-        CORE_ASSERT(false, "Tile X coordinate not in board!");
+        //CORE_ASSERT(false, "Tile X coordinate not in board!");
         return false;
     }
     if(y < 0 || y > m_rows-1) {
-        CORE_ASSERT(false, "Tile Y coordinate not in board!");
+        //CORE_ASSERT(false, "Tile Y coordinate not in board!");
         return false;
     }
     return true;
@@ -116,8 +114,7 @@ bool Board::isOwnPiece(Move moveObject)
     std::tie(startPosX, startPosY) = moveObject.getStartTile();
     std::tie(endPosX, endPosY) = moveObject.getEndTile();
     ChessPieceType piece = moveObject.getPieceType();
-    if (((((int)piece) * (int)boardState[endPosY][endPosX]) > 0))
-        return true;
+    if (((((int)piece) * (int)boardState[endPosY][endPosX]) > 0)) return true;
     else return false;
 }
 
@@ -144,10 +141,24 @@ MoveResult Board::makeMove(Move moveObject)
 
     MoveResult res;
     if (((res = isMoveValid(moveObject)) != MoveResult::Invalid) && isClear(moveObject)) {
-        m_turns++;
-        m_color = !m_color;
+        auto temp_piece = boardState[endPosY][endPosX];
         boardState[startPosY][startPosX] = none;
         boardState[endPosY][endPosX] = piece;
+        int temp_check = isCheck(moveObject);
+        std::cout << m_check << ", " << temp_check << ", " << ((int)!m_color)+1 << std::endl;
+        if (temp_check > 0 && (((((int)!m_color)+1)==temp_check) || m_check > 0)) {
+            //CORE_ASSERT(false, "Illegal Move: In check!");
+            boardState[startPosY][startPosX] = piece;
+            boardState[endPosY][endPosX] = temp_piece;
+            return MoveResult::Invalid;
+        }
+        else {
+            m_check = temp_check;
+        }
+
+        m_turns++;
+        m_color = !m_color;
+        
 
         if(piece == white_king) {
             whiteCanCastleKing = false;
@@ -180,9 +191,193 @@ MoveResult Board::makeMove(Move moveObject)
     return MoveResult::Invalid;
 }
 
-
-bool Board::isCheckMate()
+bool Board::findKnight(Move moveObject, int i, int j, int c)
 {
+    ChessPieceType searchPiece = none;
+    if (c == 1) searchPiece = black_knight;
+    else if (c == 2)searchPiece = white_knight;
+    else return false;
+
+    int x[] = { 2, 2, -2, -2,
+                1, 1, -1, -1 };
+    int y[] = { 1, -1, 1, -1,
+                2, -2, 2, -2 };
+    for (int k = 0; k < 8; k++) {
+        int m = i + x[k];
+        int n = j + y[k];
+        if (checkTileCoordInBounds(m, n) && boardState[m][n] == searchPiece) return true;
+    }
+    return false;
+}
+
+bool Board::findRook(Move moveObject, int i, int j, bool isQueen, int c)
+{
+    ChessPieceType searchPiece = none;
+    int k = 0;
+    if (c == 1) {
+        if (isQueen) searchPiece = black_queen;
+        else searchPiece = black_rook;
+    }
+    else if (c == 2) {
+        if (isQueen) searchPiece = white_queen;
+        else searchPiece = white_rook;
+    }
+    else return false; 
+
+    while (checkTileCoordInBounds(i + ++k, j)) {
+        if (boardState[i + k][j] == searchPiece) return true;
+        if (boardState[i + k][j] != none) break;
+    }
+
+    k = 0;
+    while (checkTileCoordInBounds(i + --k, j)) {
+        if (boardState[i + k][j] == searchPiece) return true;
+        if (boardState[i + k][j] != none) break;
+    }
+
+    k = 0;
+    while (checkTileCoordInBounds(i, j + ++k)) {
+        if (boardState[i][j + k] == searchPiece) return true;
+        if (boardState[i][j + k] != none) break;
+    }
+
+    k = 0;
+    while (checkTileCoordInBounds(i, j + --k)) {
+        if (boardState[i][j + k] == searchPiece) return true;
+        if (boardState[i][j + k] != none) break;
+    }
+    return false;
+}
+
+bool Board::findBishop(Move moveObject, int i, int j, bool isQueen, int c)
+{
+    ChessPieceType searchPiece = none;
+    int k = 1;
+    if (c == 1) {
+        if (isQueen) searchPiece = black_queen;
+        else searchPiece = black_bishop;
+    }
+    else if (c == 2) {
+        if (isQueen) searchPiece = white_queen;
+        else searchPiece = white_bishop;
+    }
+    else return false;
+
+    while (checkTileCoordInBounds(i + k, j + k)) {
+        if (boardState[i + k][j + k] == searchPiece) return true;
+        if (boardState[i + k][j + k] != none) break;
+        ++k;
+    }
+
+    k = 1;
+    while (checkTileCoordInBounds(i + k, j - k)) {
+        if (boardState[i + k][j - k] == searchPiece) return true;
+        if (boardState[i + k][j - k] != none) break;
+        ++k;
+    }
+
+    k = 1;
+    while (checkTileCoordInBounds(i - k, j + k)) {
+        if (boardState[i - k][j + k] == searchPiece) return true;
+        if (boardState[i - k][j + k] != none) break;
+        ++k;
+    }
+
+    k = 1;
+    while (checkTileCoordInBounds(i - k, j - k)) {
+        if (boardState[i - k][j - k] == searchPiece) return true;
+        if (boardState[i - k][j - k] != none) break;
+        ++k;
+    }
+    return false;
+}
+
+bool Board::findPawn(Move moveObject, int i, int j, int c)
+{
+    ChessPieceType searchPiece = none;
+    if (c == 1) {
+        searchPiece = black_pawn;
+        if (checkTileCoordInBounds(i + 1, j - 1) && boardState[i + 1][j - 1] == searchPiece) return true;
+        if (checkTileCoordInBounds(i + 1, j + 1) && boardState[i + 1][j + 1] == searchPiece) return true;
+    }
+    else if (c == 2) {
+        searchPiece = white_pawn;
+        if (checkTileCoordInBounds(i - 1, j - 1) && boardState[i - 1][j - 1] == searchPiece) return true;
+        if (checkTileCoordInBounds(i - 1, j + 1) && boardState[i - 1][j + 1] == searchPiece) return true;
+    }
+    return false;
+}
+
+bool Board::findQueen(Move moveObject, int i, int j, int c)
+{
+    if (findBishop(moveObject, i, j, true, c) || findRook(moveObject, i, j, true, c)) return true;
+    return false;
+}
+
+bool Board::findKing(Move moveObject, int i, int j, int c)
+{
+    ChessPieceType searchPiece = none;
+    if (c == 1) searchPiece = black_king;
+    else if (c == 2) searchPiece = white_king;
+    else return false;
+    int x[] = { -1, -1, -1, 0,
+                 0, 1, 1, 1 };
+    int y[] = { -1, 0, 1, -1,
+                 1, -1, 0, 1 };
+    for (int k = 0; k < 8; k++) {
+        int m = i + x[k];
+        int n = j + y[k];
+        if (checkTileCoordInBounds(m, n) && boardState[m][n] == searchPiece) return true;
+    }
+    return false;
+}
+
+int Board::isCheck(Move moveObject)
+{
+    int c = 0;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (boardState[i][j] == white_king) { // white king is in check
+                c = 1;
+                if (findKnight(moveObject, i, j, c)) return 1;
+                if (findPawn(moveObject, i, j, c)) return 1;
+                if (findRook(moveObject, i, j, false, c)) return 1;
+                if (findBishop(moveObject, i, j, false, c)) return 1;
+                if (findQueen(moveObject, i, j, c)) return 1;
+                if (findKing(moveObject, i, j, c)) return 1;
+            }
+
+            if (boardState[i][j] == black_king) { // black king is in check
+                c = 2;
+                if (findKnight(moveObject, i, j, c)) return 2;
+                if (findPawn(moveObject, i, j, c)) return 2;
+                if (findRook(moveObject, i, j, false, c)) return 2;
+                if (findBishop(moveObject, i, j, false, c)) return 2;
+                if (findQueen(moveObject, i, j, c)) return 2;
+                if (findKing(moveObject, i, j, c)) return 2;
+            }
+        }
+    }
+    return 0; // no one is in check
+}
+
+
+bool Board::isCheckMate(Move moveObject)
+{
+    int endPosX, endPosY;
+    std::tie(endPosX, endPosY) = moveObject.getEndTile();
+    bool check = false;
+    if (isCheck(moveObject) > 0) check = true;
+    if (isMoveValid(moveObject) && check) {
+        if (boardState[endPosY][endPosX] == white_king && isCheck(moveObject) == 1) {
+            gameEnd = true;
+            return true;
+        }
+        else if (boardState[endPosY][endPosX] == black_king && isCheck(moveObject) == 2) {
+            gameEnd = true;
+            return true;
+        }
+    }
     return false;
 }
 
@@ -205,6 +400,11 @@ void Board::resetBoard()
     whiteCanCastleQueen = true;
     blackCanCastleKing = true;
     blackCanCastleQueen = true;
+
+    epX1 = -1;
+    epX2 = -1;
+    epY1 = -1;
+    epY2 = -1;
 }
 
 int Board::getTurnCount() const
@@ -229,6 +429,11 @@ MoveResult Board::isMoveValid(Move moveObject)
     if((int)piece > 0 && !isWhiteTurn()) return MoveResult::Invalid;
     if((int)piece < 0 && isWhiteTurn()) return MoveResult::Invalid;
 
+    //get EnPassant coords from last turn and free up more for my turn
+    epX2 = epX1; 
+    epX1 = -1;
+    epY2 = epY1; 
+    epY1 = -1;
     if (piece == white_pawn || piece == black_pawn) {
 
         bool team = (piece == white_pawn);
@@ -236,34 +441,44 @@ MoveResult Board::isMoveValid(Move moveObject)
         if (piece == black_pawn && (endPosY - startPosY) > 0) return MoveResult::Invalid; // check for direction
         else if (piece == white_pawn && (endPosY - startPosY) < 0) return MoveResult::Invalid; // check for direction
             
+        //advancing
         if(distanceX == 0 && !isOccupied){
             if (distanceY == 2){
+                //save coordinates of where the pawn is for a potential en passant
+                epX1 = endPosX;
+                epY1 = endPosY;
                 if(team && startPosY == 1) return MoveResult::Standard;
                 else if(!team && startPosY == 6) return MoveResult::Standard;
-                //save coordinates of where the pawn is for a potential enpessant
-                //turn on boolean value to erase coords in the next turn
             }
-            if(distanceY == 1) 
+            if(distanceY == 1) {
+                if((team && endPosY == 7) || (!team && endPosY == 0)){ 
+                    return MoveResult::Promotion;
+                }
                 return MoveResult::Standard;
+            }
+        }else if(distanceX == 1 && distanceY == 1){          //capturing
+            if (isOppPiece){ 
+                if((team && endPosY == 7) || (!team && endPosY == 0)){ 
+                    return MoveResult::Promotion;
+                }
+                return MoveResult::Standard;
+            }
+            if (endPosX == epX2){
+                if(team && epY2 + 1 == endPosY) 
+                    return MoveResult::EnPassant; 
+                if(!team && epY2 - 1 == endPosY)
+                    return MoveResult::EnPassant;
+            }
         }
-        else if(distanceX == 1 && distanceY == 1 && isOppPiece)
-            return MoveResult::Standard;
-
     }
 
-    // if rook
     if (piece == white_rook || piece == black_rook) {
-        if ((startPosX == endPosX) || (startPosY == endPosY)) { //if on same rank or file
-            //if the coords are in the right spot in relation to en pessant, 
-            //adjust boardstate respectively
-            //return unique en pessant value for app to facilitate movement
+        if ((startPosX == endPosX) || (startPosY == endPosY)) { 
             if (!isTeamPiece) 
-                return MoveResult::Standard;      //and not blocked
+                return MoveResult::Standard;     
         }
     }
 
-
-    // if knight
     if (piece == black_knight || piece == white_knight) {
         if ((distanceX*distanceX+distanceY*distanceY) == 5){ 
             if(!isTeamPiece) 
@@ -271,26 +486,22 @@ MoveResult Board::isMoveValid(Move moveObject)
         }
     }
 
-    //else if queen
     if (piece == white_queen || piece == black_queen) {
         if (endPosX == startPosX || endPosY == startPosY || distanceX == distanceY) {
             if (!isTeamPiece) 
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard;
         }
     }
     
-
-    // if bishop
     if (piece == white_bishop || piece == black_bishop) {
         if (distanceX == distanceY) {
             if (!isTeamPiece) 
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard;
         }
     }
 
-    //else (king case)
     if (piece == white_king || piece == black_king) {
-        //if castling
+        //castling
         if(distanceX == 2 && piece == white_king) {
             if((whiteCanCastleKing && startPosX < endPosX) || (whiteCanCastleQueen && startPosX > endPosX)) {
                 std::cout << "valid castle\n";
@@ -302,17 +513,19 @@ MoveResult Board::isMoveValid(Move moveObject)
                 return MoveResult::Castle;
             }
         }
-            //if king hasn't moved and rook in the corner haven't moved
-            //if king can pass to new square without seeing check
-            //if castling is initiated
-            //move king and rook -> return different value to trigger piece movement in app
+        //moving
         if(distanceX <= 1 && distanceY <= 1) {
             if (!isTeamPiece)
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard; 
         }
     }
 
     return MoveResult::Invalid;
+}
+
+void Board::setBoardStateAt(int x, int y, ChessPieceType piece){
+    std::cout << "promo" << std::endl;
+    boardState[y][x] = piece;
 }
 
 std::vector<ChessPieceType> Board::getBoardState() {
