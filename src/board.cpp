@@ -328,8 +328,6 @@ bool Board::findKing(Move moveObject, int i, int j, int c)
         int m = i + x[k];
         int n = j + y[k];
         if (checkTileCoordInBounds(m, n) && boardState[m][n] == searchPiece) return true;
-        // helper function that stores location of search piece
-        // getLocation? return a tuple?
     }
     return false;
 }
@@ -342,7 +340,6 @@ int Board::isCheck(Move moveObject)
             if (boardState[i][j] == white_king) { // white king is in check
                 c = 1;
                 if (findKnight(moveObject, i, j, c)) { 
-                    //attackingPieces.push_back()
                     return 1; 
                 }
                 if (findPawn(moveObject, i, j, c)) return 1;
@@ -363,8 +360,6 @@ int Board::isCheck(Move moveObject)
             }
         }
     }
-    // if attackPiecesBlack.size != 0 return 1;
-   // if attackingPiecesWhite.size != 0 return 2;
     return 0; // no one is in check
 }
 
