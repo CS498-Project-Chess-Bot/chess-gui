@@ -141,16 +141,24 @@ MoveResult Board::makeMove(Move moveObject)
 
     MoveResult res;
     if (((res = isMoveValid(moveObject)) != MoveResult::Invalid) && isClear(moveObject)) {
-        m_turns++;
-        m_color = !m_color;
+        auto temp_piece = boardState[endPosY][endPosX];
         boardState[startPosY][startPosX] = none;
         boardState[endPosY][endPosX] = piece;
-        if (isCheck(moveObject) > 0) {
-            CORE_ASSERT(false, "Check!");
-            m_check = true;
-            isCheckMate(moveObject);
+        int temp_check = isCheck(moveObject);
+        std::cout << m_check << ", " << temp_check << ", " << ((int)!m_color)+1 << std::endl;
+        if (temp_check > 0 && (((((int)!m_color)+1)==temp_check) || m_check > 0)) {
+            //CORE_ASSERT(false, "Illegal Move: In check!");
+            boardState[startPosY][startPosX] = piece;
+            boardState[endPosY][endPosX] = temp_piece;
+            return MoveResult::Invalid;
         }
-        else m_check = false;
+        else {
+            m_check = temp_check;
+        }
+
+        m_turns++;
+        m_color = !m_color;
+        
 
         if(piece == white_king) {
             whiteCanCastleKing = false;
@@ -404,6 +412,11 @@ void Board::resetBoard()
     whiteCanCastleQueen = true;
     blackCanCastleKing = true;
     blackCanCastleQueen = true;
+
+    epX1 = -1;
+    epX2 = -1;
+    epY1 = -1;
+    epY2 = -1;
 }
 
 int Board::getTurnCount() const
@@ -428,6 +441,11 @@ MoveResult Board::isMoveValid(Move moveObject)
     if((int)piece > 0 && !isWhiteTurn()) return MoveResult::Invalid;
     if((int)piece < 0 && isWhiteTurn()) return MoveResult::Invalid;
 
+    //get EnPassant coords from last turn and free up more for my turn
+    epX2 = epX1; 
+    epX1 = -1;
+    epY2 = epY1; 
+    epY1 = -1;
     if (piece == white_pawn || piece == black_pawn) {
 
         bool team = (piece == white_pawn);
@@ -435,34 +453,44 @@ MoveResult Board::isMoveValid(Move moveObject)
         if (piece == black_pawn && (endPosY - startPosY) > 0) return MoveResult::Invalid; // check for direction
         else if (piece == white_pawn && (endPosY - startPosY) < 0) return MoveResult::Invalid; // check for direction
             
+        //advancing
         if(distanceX == 0 && !isOccupied){
             if (distanceY == 2){
+                //save coordinates of where the pawn is for a potential en passant
+                epX1 = endPosX;
+                epY1 = endPosY;
                 if(team && startPosY == 1) return MoveResult::Standard;
                 else if(!team && startPosY == 6) return MoveResult::Standard;
-                //save coordinates of where the pawn is for a potential enpessant
-                //turn on boolean value to erase coords in the next turn
             }
-            if(distanceY == 1) 
+            if(distanceY == 1) {
+                if((team && endPosY == 7) || (!team && endPosY == 0)){ 
+                    return MoveResult::Promotion;
+                }
                 return MoveResult::Standard;
+            }
+        }else if(distanceX == 1 && distanceY == 1){          //capturing
+            if (isOppPiece){ 
+                if((team && endPosY == 7) || (!team && endPosY == 0)){ 
+                    return MoveResult::Promotion;
+                }
+                return MoveResult::Standard;
+            }
+            if (endPosX == epX2){
+                if(team && epY2 + 1 == endPosY) 
+                    return MoveResult::EnPassant; 
+                if(!team && epY2 - 1 == endPosY)
+                    return MoveResult::EnPassant;
+            }
         }
-        else if(distanceX == 1 && distanceY == 1 && isOppPiece)
-            return MoveResult::Standard;
-
     }
 
-    // if rook
     if (piece == white_rook || piece == black_rook) {
-        if ((startPosX == endPosX) || (startPosY == endPosY)) { //if on same rank or file
-            //if the coords are in the right spot in relation to en pessant, 
-            //adjust boardstate respectively
-            //return unique en pessant value for app to facilitate movement
+        if ((startPosX == endPosX) || (startPosY == endPosY)) { 
             if (!isTeamPiece) 
-                return MoveResult::Standard;      //and not blocked
+                return MoveResult::Standard;     
         }
     }
 
-
-    // if knight
     if (piece == black_knight || piece == white_knight) {
         if ((distanceX*distanceX+distanceY*distanceY) == 5){ 
             if(!isTeamPiece) 
@@ -470,26 +498,22 @@ MoveResult Board::isMoveValid(Move moveObject)
         }
     }
 
-    //else if queen
     if (piece == white_queen || piece == black_queen) {
         if (endPosX == startPosX || endPosY == startPosY || distanceX == distanceY) {
             if (!isTeamPiece) 
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard;
         }
     }
     
-
-    // if bishop
     if (piece == white_bishop || piece == black_bishop) {
         if (distanceX == distanceY) {
             if (!isTeamPiece) 
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard;
         }
     }
 
-    //else (king case)
     if (piece == white_king || piece == black_king) {
-        //if castling
+        //castling
         if(distanceX == 2 && piece == white_king) {
             if((whiteCanCastleKing && startPosX < endPosX) || (whiteCanCastleQueen && startPosX > endPosX)) {
                 std::cout << "valid castle\n";
@@ -501,17 +525,19 @@ MoveResult Board::isMoveValid(Move moveObject)
                 return MoveResult::Castle;
             }
         }
-            //if king hasn't moved and rook in the corner haven't moved
-            //if king can pass to new square without seeing check
-            //if castling is initiated
-            //move king and rook -> return different value to trigger piece movement in app
+        //moving
         if(distanceX <= 1 && distanceY <= 1) {
             if (!isTeamPiece)
-                return MoveResult::Standard; // own piece at destination
+                return MoveResult::Standard; 
         }
     }
 
     return MoveResult::Invalid;
+}
+
+void Board::setBoardStateAt(int x, int y, ChessPieceType piece){
+    std::cout << "promo" << std::endl;
+    boardState[y][x] = piece;
 }
 
 std::vector<ChessPieceType> Board::getBoardState() {

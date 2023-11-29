@@ -25,6 +25,7 @@ public:
 	void resetBoard();
 	int getTurnCount() const;
 	std::vector<ChessPieceType> getBoardState();
+	void setBoardStateAt(int x, int y, ChessPieceType piece);
 	std::string toFEN() const;
 	bool gameEnd = false;
 
@@ -47,7 +48,7 @@ private:
 	int m_turns;
 	int m_captureCount = 0;
 	bool m_color = true; // true when white, false when black
-	bool m_check = false;
+	int m_check = 0;
 	const static int m_rows = 8;
 	const static int m_cols = 8;
 	using enum ChessPieceType;
@@ -68,7 +69,9 @@ private:
 	bool blackCanCastleQueen = true;
 	bool blackCanCastleKing = true;
 
-	std::vector<ChessPieceType> attackingPiecesBlack;
-	std::vector<ChessPieceType> attackingPiecesWhite;
+	int epX1 = -1;
+	int epX2 = -1;
+	int epY1 = -1;
+	int epY2 = -1;
 };
 #endif
