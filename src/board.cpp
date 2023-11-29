@@ -320,6 +320,8 @@ bool Board::findKing(Move moveObject, int i, int j, int c)
         int m = i + x[k];
         int n = j + y[k];
         if (checkTileCoordInBounds(m, n) && boardState[m][n] == searchPiece) return true;
+        // helper function that stores location of search piece
+        // getLocation? return a tuple?
     }
     return false;
 }
@@ -331,7 +333,10 @@ int Board::isCheck(Move moveObject)
         for (int j = 0; j < 8; j++) {
             if (boardState[i][j] == white_king) { // white king is in check
                 c = 1;
-                if (findKnight(moveObject, i, j, c)) return 1;
+                if (findKnight(moveObject, i, j, c)) { 
+                    //attackingPieces.push_back()
+                    return 1; 
+                }
                 if (findPawn(moveObject, i, j, c)) return 1;
                 if (findRook(moveObject, i, j, false, c)) return 1;
                 if (findBishop(moveObject, i, j, false, c)) return 1;
@@ -350,32 +355,39 @@ int Board::isCheck(Move moveObject)
             }
         }
     }
+    // if attackPiecesBlack.size != 0 return 1;
+   // if attackingPiecesWhite.size != 0 return 2;
     return 0; // no one is in check
 }
 
 
 bool Board::isCheckMate(Move moveObject)
-{
-    int endPosX, endPosY;
-    std::tie(endPosX, endPosY) = moveObject.getEndTile();
-    bool check = false;
-    if (isCheck(moveObject) > 0) check = true;
-    if (isMoveValid(moveObject) && check) {
-        if (boardState[endPosY][endPosX] == white_king && isCheck(moveObject) == 1) {
-            gameEnd = true;
+{   
+    std::vector<Move>movesVec = possibleMoves();
+    int vecSize = movesVec.size();
+    for (int i = 0; i < vecSize; i++) {
+        if (isCheck(movesVec[i]) == 0)
+            return false;
+    }
+
+    for (int i = 0; i < vecSize; i++) {
+        if (isCheck(movesVec[i]) == 1 || isCheck(movesVec[i]) == 2)
             return true;
-        }
-        else if (boardState[endPosY][endPosX] == black_king && isCheck(moveObject) == 2) {
-            gameEnd = true;
-            return true;
-        }
     }
     return false;
 }
 
 bool Board::isStalemate()
 {
-    return false;
+    std::vector<Move>movesVec = possibleMoves();
+    int vecSize = movesVec.size();
+    if(vecSize == 0)
+        return true;
+    for (int i = 0; i < vecSize; i++) {
+        if (isCheck(movesVec[i]) == 0)
+            return false;
+    }
+    return true;
 }
 
 void Board::resetBoard()
@@ -565,4 +577,133 @@ std::string Board::toFEN() const {
 
     return fen;
 
+}
+std::vector<Move> Board::possibleMoves() {
+    Move moveObject;
+    std::vector<Move> potentialMoves;
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (boardState[i][j] == white_pawn) {
+                moveObject.setStart(i, j);
+                moveObject.setEnd(i + 1, j);
+                moveObject.setPiece(white_pawn);
+                if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i + 1, j)) potentialMoves.push_back(moveObject); // normal movement
+                else if (i == 1) {
+                    moveObject.setEnd(i + 2, j);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i + 2, j)) potentialMoves.push_back(moveObject); // first move
+                }
+                moveObject.setEnd(i + 1, j + 1);
+                if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i + 1, j + 1)) potentialMoves.push_back(moveObject); // capture right
+                moveObject.setEnd(i + 1, j - 1);
+                if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i + 1, j - 1)) potentialMoves.push_back(moveObject); // capture left
+            }
+
+
+            else if (boardState[i][j] == black_pawn) {
+                moveObject.setStart(i, j);
+                moveObject.setEnd(i - 1, j);
+                moveObject.setPiece(black_pawn);
+                if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i - 1, j)) potentialMoves.push_back(moveObject); // normal movement
+                else if (i == 6) {
+                    moveObject.setEnd(i - 2, j);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i - 2, j)) potentialMoves.push_back(moveObject); // first move
+                }
+                moveObject.setEnd(i - 1, j + 1);
+                if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i - 1, j + 1)) potentialMoves.push_back(moveObject); // capture right
+                moveObject.setEnd(i - 1, j - 1);
+                if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i - 1, j - 1)) potentialMoves.push_back(moveObject); // capture left
+            }
+
+            else if (boardState[i][j] == white_knight || boardState[i][j] == black_knight) {
+                moveObject.setStart(i, j);
+                if (boardState[i][j] == white_knight) moveObject.setPiece(white_knight);
+                else if (boardState[i][j] == black_knight) moveObject.setPiece(black_knight);
+                int x[] = { 2, 2, -2, -2,
+                            1, 1, -1, -1 };
+                int y[] = { 1, -1, 1, -1,
+                            2, -2, 2, -2 };
+                for (int k = 0; k < 8; k++) {
+                    int m = i + x[k];
+                    int n = j + y[k];
+                    moveObject.setEnd(m, n);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(m, n)) potentialMoves.push_back(moveObject);
+                }
+            }
+
+            else if (boardState[i][j] == white_bishop || boardState[i][j] == black_bishop) {
+                moveObject.setStart(i, j);
+                if (boardState[i][j] == white_bishop) moveObject.setPiece(white_bishop);
+                else if (boardState[i][j] == black_bishop) moveObject.setPiece(black_bishop);
+                for (int x = 1; x < 8; x++) {
+                    moveObject.setEnd(i + x, j + x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i + x, j + x)) potentialMoves.push_back(moveObject); // up right
+                    moveObject.setEnd(i + x, j - x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i + x, j - x)) potentialMoves.push_back(moveObject); // up left
+                    moveObject.setEnd(i - x, j + x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i - x, j + x)) potentialMoves.push_back(moveObject); // down right
+                    moveObject.setEnd(i - x, j - x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i - x, j - x)) potentialMoves.push_back(moveObject); // down left
+                }
+            }
+
+            else if (boardState[i][j] == white_rook || boardState[i][j] == black_rook) {
+                moveObject.setStart(i, j);
+                if (boardState[i][j] == white_rook) moveObject.setPiece(white_rook);
+                else if (boardState[i][j] == black_rook) moveObject.setPiece(black_rook);
+                for (int x = 1; x < 8; x++) {
+                    moveObject.setEnd(i, j + x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i, j + x)) potentialMoves.push_back(moveObject); // up 
+                    moveObject.setEnd(i, j - x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i, j - x)) potentialMoves.push_back(moveObject); // down
+                    moveObject.setEnd(i - x, j);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i - x, j)) potentialMoves.push_back(moveObject); // left
+                    moveObject.setEnd(i + x, j);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i + x, j)) potentialMoves.push_back(moveObject); // right
+                }
+            }
+
+            else if (boardState[i][j] == white_queen || boardState[i][j] == black_queen) {
+                moveObject.setStart(i, j);
+                if (boardState[i][j] == white_queen) moveObject.setPiece(white_queen);
+                else if (boardState[i][j] == black_queen) moveObject.setPiece(black_queen);
+                for (int x = 1; x < 8; x++) {
+                    moveObject.setEnd(i + x, j + x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i + x, j + x)) potentialMoves.push_back(moveObject); // up right
+                    moveObject.setEnd(i + x, j - x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i + x, j - x)) potentialMoves.push_back(moveObject); // up left
+                    moveObject.setEnd(i - x, j + x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i - x, j + x)) potentialMoves.push_back(moveObject); // down right
+                    moveObject.setEnd(i - x, j - x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i - x, j - x)) potentialMoves.push_back(moveObject); // down left
+                    moveObject.setEnd(i, j + x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i, j + x)) potentialMoves.push_back(moveObject); // up 
+                    moveObject.setEnd(i, j - x);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i, j - x)) potentialMoves.push_back(moveObject); // down
+                    moveObject.setEnd(i - x, j);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i - x, j)) potentialMoves.push_back(moveObject); // left
+                    moveObject.setEnd(i + x, j);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(i + x, j)) potentialMoves.push_back(moveObject); // right
+                }
+            }
+
+            else if (boardState[i][j] == white_king || boardState[i][j] == black_king) {
+                moveObject.setStart(i, j);
+                if (boardState[i][j] == white_king) moveObject.setPiece(white_king);
+                else if (boardState[i][j] == black_king) moveObject.setPiece(black_king);
+                int x[] = { -1, -1, -1, 0,
+                             0, 1, 1, 1 };
+                int y[] = { -1, 0, 1, -1,
+                             1, -1, 0, 1 };
+                for (int k = 0; k < 8; k++) {
+                    int m = i + x[k];
+                    int n = j + y[k];
+                    moveObject.setEnd(m, n);
+                    if (isMoveValid(moveObject) == MoveResult::Standard && checkTileCoordInBounds(m, n)) potentialMoves.push_back(moveObject);
+                }
+            }
+        }
+    }
+
+    return potentialMoves;
 }

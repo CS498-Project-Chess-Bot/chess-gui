@@ -41,6 +41,7 @@ private:
 	bool findPawn(Move, int, int, int);
 	bool findQueen(Move, int, int, int);
 	bool findKing(Move, int, int, int);
+	std::vector<Move> possibleMoves();
 
 
 	int m_turns;
@@ -66,5 +67,8 @@ private:
 	bool whiteCanCastleKing = true;
 	bool blackCanCastleQueen = true;
 	bool blackCanCastleKing = true;
+
+	std::vector<ChessPieceType> attackingPiecesBlack;
+	std::vector<ChessPieceType> attackingPiecesWhite;
 };
 #endif

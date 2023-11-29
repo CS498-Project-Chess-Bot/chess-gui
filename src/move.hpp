@@ -22,10 +22,24 @@ enum class ChessPieceType {
 
 class Move {
 public:
-	Move(int startPosX, int startPosY, int endPosX, int endPosY, ChessPieceType piece);
+	Move(int startPosX = -1, int startPosY = -1, int endPosX = -1, int endPosY = -1, ChessPieceType piece = ChessPieceType::none);
 	std::tuple<int, int> getStartTile();
 	std::tuple<int, int> getEndTile();
 	ChessPieceType getPieceType();
+
+    void setStart(int x, int y) {
+        m_startPosX = x;
+        m_startPosY = y;
+    }
+
+    void setEnd(int x, int y) {
+        m_endPosX = x;
+        m_endPosY = y;
+    }
+
+    void setPiece(ChessPieceType piece) {
+        m_piece = piece;
+    }
 
 private:
 	int moveNumber;
