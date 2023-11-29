@@ -30,6 +30,7 @@ private:
     Board m_gameBoard;
     bool m_isPlayerWhite;
     Ref<Object> saved[3] = {nullptr, nullptr, nullptr};
+    bool gameOver = false;
 
 };
 

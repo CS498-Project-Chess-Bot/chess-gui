@@ -19,6 +19,7 @@
 #include <chrono>
 #include <thread>
 #include <cstdlib>
+#include <iomanip>
 
 #include <glad/glad.h>
 #include <glfw/glfw3.h>

@@ -40,10 +40,20 @@ public:
     void setPiece(ChessPieceType piece) {
         m_piece = piece;
     }
-
+    friend std::ostream& operator<<(std::ostream& os, const Move& other);
+    
 private:
 	int moveNumber;
 	int m_startPosX, m_startPosY, m_endPosX, m_endPosY;
 	ChessPieceType m_piece;
 };
+
+std::ostream& operator<<(std::ostream& out, Move& other) {
+    int startPosX, startPosY, endPosX, endPosY;
+    std::tie(startPosX, startPosY) = other.getStartTile();
+    std::tie(endPosX, endPosY) = other.getEndTile();
+    out << (int)other.getPieceType() << ": (" << startPosX << ", " << startPosY << ") -> (" << endPosX << ", " << endPosY << ")";
+    return out;
+}
+
 #endif

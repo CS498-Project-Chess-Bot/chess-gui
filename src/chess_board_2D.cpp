@@ -42,8 +42,10 @@ ChessBoardModel2D::~ChessBoardModel2D() {
 }
 
 bool ChessBoardModel2D::tryMove(Move m) {
+    if(gameOver) return false;
+
     MoveResult res = m_gameBoard.makeMove(m);
-    if(res != MoveResult::Invalid) {
+    if(res != MoveResult::Invalid && res != MoveResult::GameOver) {
         int startX = std::get<0>(m.getStartTile());
         int startY = std::get<1>(m.getStartTile());
         int endX = std::get<0>(m.getEndTile());
@@ -97,7 +99,6 @@ bool ChessBoardModel2D::tryMove(Move m) {
                 saveDir += 8;
             }
 
-            std::cout << "checkpoint1" << std::endl;
 
             //save states of the 3 squares below before clearing and displaying promotion choices
             for(int i = 1; i < 4; i++){
@@ -105,8 +106,6 @@ bool ChessBoardModel2D::tryMove(Move m) {
                     saved[i-1] = m_children[endIdx + saveDir * i]->getChildren().front();
             }
 
-            
-            std::cout << "checkpoint2" << std::endl;
 
             for(int i = 0; i < 4; i++){
                 m_children[endIdx + saveDir * i]->getChildren().clear();
@@ -140,7 +139,34 @@ bool ChessBoardModel2D::tryMove(Move m) {
         }
     }
 
-    return res != MoveResult::Invalid;
+    if(res == MoveResult::GameOver) {
+        Board::GameOverState state = m_gameBoard.endState;
+        int startX = std::get<0>(m.getStartTile());
+        int startY = std::get<1>(m.getStartTile());
+        int endX = std::get<0>(m.getEndTile());
+        int endY = std::get<1>(m.getEndTile());
+
+        int startIdx = startY * CHESS_ROWS + startX;
+        int endIdx = endY * CHESS_ROWS + endX;
+
+        m_children[endIdx]->getChildren().clear();
+        m_children[endIdx]->addChild(m_children[startIdx]->getChildren().front());
+        m_children[startIdx]->getChildren().clear();
+
+        if(state == Board::GameOverState::WhiteWin) {
+            std::cout << "White Wins!";
+        }
+        else if(state == Board::GameOverState::BlackWin) {
+            std::cout << "Black Wins!";
+        }
+        else {
+            std::cout << "It's a draw!";
+        }
+        gameOver = true;
+        std::cout << std::endl;
+    }
+
+    return res != MoveResult::Invalid && res != MoveResult::GameOver;
 }
 
 void ChessBoardModel2D::promotePiece(int tileX, int tileY){
