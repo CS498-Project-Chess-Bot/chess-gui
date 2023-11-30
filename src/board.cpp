@@ -177,6 +177,9 @@ MoveResult Board::makeMove(Move moveObject)
             }
         }
 
+        int saveEnPassantX = epX1;
+        int saveEnPassantY = epY1;
+
         if(isCheckMate(moveObject)) {
             isGameOver = true;
             endState = isWhiteTurn() ? GameOverState::BlackWin : GameOverState::WhiteWin;
@@ -187,6 +190,9 @@ MoveResult Board::makeMove(Move moveObject)
             endState = GameOverState::Draw;
             return MoveResult::GameOver;
         }
+
+        epX1 = saveEnPassantX;
+        epY1 = saveEnPassantY;
 
         return res;
     }
@@ -613,7 +619,30 @@ std::string Board::toFEN() const {
 
     fen += ' ';
     fen += isWhiteTurn()? 'w' : 'b';
-    fen += " - - ";
+
+    fen += ' ';
+
+    std::string castleField = "";
+    if(whiteCanCastleKing)
+        castleField += 'K';
+    if(whiteCanCastleQueen)
+        castleField += 'Q';
+    if(blackCanCastleKing)
+        castleField += 'k';
+    if(blackCanCastleQueen)
+        castleField += 'q';
+    if(castleField.empty())
+        castleField += '-';
+    fen += castleField;
+    
+    fen += ' ';
+    if(epX1 > -1 && epY1 > -1) {
+        fen += ('a' + epX1);
+        fen += (epY1 >= 4) ? '6' : '3';
+    }
+    else fen += '-';
+    fen += ' ';
+
     fen += std::to_string(m_turns);
     fen += " " + std::to_string(getTurnCount());
 

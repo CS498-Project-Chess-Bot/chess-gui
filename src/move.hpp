@@ -23,6 +23,7 @@ enum class ChessPieceType {
 class Move {
 public:
 	Move(int startPosX = -1, int startPosY = -1, int endPosX = -1, int endPosY = -1, ChessPieceType piece = ChessPieceType::none);
+    Move(std::string& text, ChessPieceType piece);
 	std::tuple<int, int> getStartTile();
 	std::tuple<int, int> getEndTile();
 	ChessPieceType getPieceType();
@@ -40,6 +41,7 @@ public:
     void setPiece(ChessPieceType piece) {
         m_piece = piece;
     }
+
     friend std::ostream& operator<<(std::ostream& os, const Move& other);
     
 private:

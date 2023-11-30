@@ -15,7 +15,7 @@ public:
     ~ChessBoardModel2D();
     bool needsPromotionSelection = false;
 
-    inline Board& getGameBoard() { return m_gameBoard; }
+    inline Board getGameBoard() { return m_gameBoard; }
     bool tryMove(Move m);
     void promotePiece(int tileX, int tileY);
     bool getHitTile(Camera& cam, glm::vec3 rayDir, int* x, int* y);

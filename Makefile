@@ -24,7 +24,7 @@ TEXTURE_FILES = $(wildcard textures/*)
 BUILD_TEXTURE_FILES = $(TEXTURE_FILES:%=$(BUILD_DIR)/%)
 
 PY_FILES = $(wildcard chess-engine/*.py)
-BUILD_PY_FILES = $(PY_FILES:%=$(BUILD_DIR)/%)
+BUILD_PY_FILES = $(BUILD_DIR)/MoveGenerator.exe
 
 CFLAGS = -g -Wall -Werror -pedantic -std=c++23
 LFLAGS = -Wl,--allow-multiple-definition
@@ -49,7 +49,8 @@ $(BUILD_TEXTURE_FILES): $(TEXTURE_FILES)
 	cp -r textures $(BUILD_DIR)
 
 $(BUILD_PY_FILES) : $(PY_FILES)
-	cp -r chess-engine $(BUILD_DIR)
+	cd chess-engine; ls; ./BuildEngine.bat
+	cp chess-engine/MoveGenerator.exe $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp $(SRC_DIR)/%.hpp
 	g++ -c $(CFLAGS) -o $@ $< $(INCLUDE_PARAMS)

@@ -54,11 +54,22 @@ App::App(int width, int height, const std::string title)
     s_height = height;
 
     srand(time(NULL));
+    isPlayerWhite = (bool)(rand()%2);
+
+    if(isPlayerWhite) 
+        std::cout << "The player is white!" << std::endl;
+    else
+        std::cout << "The player is black!" << std::endl;
 }
 
 int App::run() {
 
     Ref<ChessBoardModel2D> chessBoard;
+
+    chessBoard = createRef<ChessBoardModel2D>(isPlayerWhite);
+    shouldResetGame = false;
+    bool cpuShouldMove = !isPlayerWhite;
+    bool cpuPending = false;
 
     Camera camera({3.5f, 3.5f, 5.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, -1.0f});
 
@@ -66,21 +77,74 @@ int App::run() {
     int firstTileX = -1, firstTileY = -1;
 
     std::future<CommandResult> engineResult;
-    engineResult = std::async(Command::exec, "python ./chess-engine/Game.py");
     while (!glfwWindowShouldClose(window))
     {
-        processInput();
-        if(shouldResetGame) {
-            chessBoard = createRef<ChessBoardModel2D>((bool)(rand()%2));
-            shouldResetGame = false;
+        if(cpuShouldMove) {
+            std::string cmd = "MoveGenerator.exe \"" + chessBoard->getGameBoard().toFEN() + "\"";
+            engineResult = std::async(Command::exec, cmd);
+            cpuShouldMove = false;
+            cpuPending = true;
+            std::cout << "Waiting for cpu to move..." << std::endl;
         }
 
-        std::future_status engineStatus = engineResult.wait_for(std::chrono::seconds(0));
-        if(engineStatus == std::future_status::ready) {
-            CommandResult r = engineResult.get();
-            std::cout << r << std::endl;
-            engineResult = std::async(Command::exec, "python ./chess-engine/Game.py");
+        processInput();
+        if(shouldResetGame) {
+            if(cpuPending) {
+                std::future_status engineStatus = engineResult.wait_for(std::chrono::seconds(0));
+                if(engineStatus != std::future_status::ready) {
+                    RenderCommand::beginScene(camera);
+                    RenderCommand::clear(0.2f, 0.3f, 0.3f, 1.0f);
+                    Ref<Object> boardObject = std::dynamic_pointer_cast<Object>(chessBoard);
+                    RenderCommand::submit(boardObject);
+                    RenderCommand::endScene(s_width, s_height);
+
+                    glfwSwapBuffers(window);
+                    glfwPollEvents();
+                    continue;
+                }
+            }
+            
+
+            isPlayerWhite = (bool)(rand()%2);
+            chessBoard = createRef<ChessBoardModel2D>(isPlayerWhite);
+            cpuPending = false;
+            cpuShouldMove = !isPlayerWhite;
+            shouldResetGame = false;
+
+            if(isPlayerWhite) 
+                std::cout << "The player is white!" << std::endl;
+            else
+                std::cout << "The player is black!" << std::endl;
+
+            if(isPlayerWhite)
+                std::cout << "Waiting for the player to move..." << std::endl;
         }
+
+        if(cpuPending) {
+            std::future_status engineStatus = engineResult.wait_for(std::chrono::seconds(0));
+            if(engineStatus == std::future_status::ready) {
+                CommandResult r = engineResult.get();
+                
+                std::string res = r.output.substr(0, 4);
+                //std::cout << res << std::endl;
+                Move cpuMove(res, ChessPieceType::none);
+
+                int startX, startY;
+                std::tie(startX, startY) = cpuMove.getStartTile();
+                ChessPieceType piece = chessBoard->getGameBoard().getBoardState().at(startY * 8 + startX);
+                cpuMove.setPiece(piece);
+                //std::cout << cpuMove << std::endl;
+
+                if(!chessBoard->tryMove(cpuMove)) {
+                    cpuShouldMove = true;
+                    std::cout << "Waiting for the player to move..." << std::endl;
+                }   
+                    
+
+                cpuPending = false;
+            }
+        }
+        
 
         if(m_mousePressed_x != -1 && m_mousePressed_y != -1) {
             glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)s_width/(float)s_height, 0.1f, 100.0f);
@@ -103,8 +167,15 @@ int App::run() {
                 }
                 else {
                     chessBoard->setTileHightlight(firstTileX, firstTileY, false);
-                    if(chessBoard->tryMove(Move(firstTileX, firstTileY, tileX, tileY, chessBoard->getGameBoard().getBoardState().at(firstTileY*8 + firstTileX)))) {
-                        firstTileSelected = false;
+                    if(isPlayerWhite == chessBoard->getGameBoard().isWhiteTurn()) {
+                        if(chessBoard->tryMove(Move(firstTileX, firstTileY, tileX, tileY, chessBoard->getGameBoard().getBoardState().at(firstTileY*8 + firstTileX)))) {
+                            firstTileSelected = false;
+                            cpuShouldMove = true;
+                        }
+                        else {
+                            firstTileX = tileX;
+                            firstTileY = tileY;
+                        }
                     }
                     else {
                         firstTileX = tileX;
@@ -187,4 +258,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
     if (key == GLFW_KEY_R && action == GLFW_PRESS)
         shouldResetGame = true;
+
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        exit(0);
 }

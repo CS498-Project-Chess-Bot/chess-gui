@@ -8,7 +8,7 @@ const unsigned int SCR_HEIGHT = 600;
 int main(void)
 {
 
-    App app(SCR_WIDTH, SCR_HEIGHT, "chess-gui");
+    App app(SCR_WIDTH, SCR_HEIGHT, "CS498 Project: Chess Engine");
 
     int result = app.run();
 
