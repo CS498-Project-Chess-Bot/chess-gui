@@ -137,8 +137,10 @@ int App::run() {
 
                 if(!chessBoard->tryMove(cpuMove)) {
                     cpuShouldMove = true;
-                    std::cout << "Waiting for the player to move..." << std::endl;
                 }   
+                else {
+                    std::cout << "Waiting for the player to move..." << std::endl;
+                }
                     
 
                 cpuPending = false;
