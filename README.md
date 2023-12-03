@@ -27,6 +27,7 @@ By: Matthew Whalen, Cameron Egbert, Anna Thompson, and Ethan Tate
 - Install [w64devkit](https://github.com/skeeto/w64devkit)
 - Get the latest zip release and extract it
 - Add folder to `PATH`
+- Install Python 3.8 or later for chess-engine
 - Restart PC
 - Open `cmd`
 - Run `make` and check that it finds the command
