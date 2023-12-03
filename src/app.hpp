@@ -16,6 +16,7 @@ private:
     
 private:
     GLFWwindow* window;
+    bool isPlayerWhite;
 
 public:
     static uint32_t s_width, s_height;
